@@ -176,7 +176,7 @@ a {
   top: 50%;
   right: 0;
   z-index: 3;
-  width: min(34vw, 64vh);
+  width: min(42vw, 78vh);
   transform: translateY(-46%);
   animation: phone-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
