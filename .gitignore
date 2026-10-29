@@ -1,0 +1,29 @@
+# dependencies และไฟล์ build
+node_modules/
+dist/
+build/
+bin/
+__pycache__/
+*.pyc
+.venv/
+
+# ค่าลับและค่าเฉพาะเครื่อง
+.env
+.env.*
+!.env.example
+
+# ข้อมูลที่ห้ามขึ้น git: วิดีโอ ภาพ และข้อมูล กฟภ.
+data/
+*.mp4
+*.mov
+*.gpx
+
+# ไฟล์ของ editor และระบบปฏิบัติการ
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# ไฟล์ที่รอลบ
+_to_delete/
