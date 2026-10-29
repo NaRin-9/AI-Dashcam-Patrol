@@ -1,0 +1,125 @@
+/* ---------- Welcome ---------- */
+.welcome {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-areas: 'head' 'art' 'cta';
+  grid-template-rows: auto 1fr auto;
+  padding: clamp(24px, 6vw, 56px) 24px clamp(28px, 6vh, 56px);
+  overflow: hidden;
+  background: var(--purple) url('../assets/world-map.svg') center 60% / cover no-repeat;
+}
+.welcome-head {
+  grid-area: head;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+.welcome-title {
+  margin: 0;
+  font-family: 'Barlow Condensed', var(--font);
+  font-size: clamp(2.75rem, 13vw, 3.75rem);
+  font-weight: 500;
+  line-height: 1;
+}
+.welcome-sub {
+  margin: 8px 0 0;
+  font-size: clamp(1rem, 4.4vw, 1.25rem);
+  line-height: 1.5;
+}
+.welcome-logo {
+  flex: none;
+  width: clamp(72px, 20vw, 96px);
+  height: auto;
+}
+
+.welcome-art {
+  grid-area: art;
+  display: grid;
+  place-items: center;
+  padding: 24px 0;
+}
+.welcome-art img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 82%;
+  max-height: min(56vh, 540px);
+  transform: rotate(-10deg);
+  filter: drop-shadow(0 24px 30px rgba(30, 0, 25, 0.45));
+  user-select: none;
+}
+
+.welcome-cta {
+  grid-area: cta;
+  display: flex;
+  justify-content: center;
+}
+.welcome-btn {
+  width: min(100%, 360px);
+  height: 58px;
+  border-radius: 12px;
+  font-size: 1.375rem;
+  font-weight: 500;
+  box-shadow: 0 3px 8px rgba(40, 0, 30, 0.35);
+}
+
+/* PC / แท็บเล็ตแนวนอน: ข้อความซ้าย แอปขวา */
+@media (min-width: 900px) {
+  .welcome {
+    grid-template-areas: 'head art' 'cta art';
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: 4vw;
+    padding: 6vh var(--gutter) 6vh var(--text-left);
+  }
+  .welcome-head {
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    align-items: flex-start;
+    gap: 28px;
+    align-self: end;
+  }
+  .welcome-title {
+    font-size: clamp(4rem, 7vw, 7rem);
+  }
+  .welcome-sub {
+    margin-top: 12px;
+    font-size: clamp(1.4rem, 2.2vw, 2.4rem);
+  }
+  .welcome-logo {
+    width: clamp(88px, 8vw, 140px);
+  }
+  .welcome-art {
+    align-self: center;
+    padding: 0;
+  }
+  .welcome-art img {
+    max-width: 100%;
+    max-height: 78vh;
+    transform: rotate(-8deg);
+  }
+  .welcome-cta {
+    justify-content: flex-start;
+    align-self: start;
+    margin-top: clamp(28px, 5vh, 64px);
+  }
+  .welcome-btn {
+    width: auto;
+    padding: 0 2.4em;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .welcome-art img {
+    animation: welcome-in 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  @keyframes welcome-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px) rotate(-10deg);
+    }
+  }
+}

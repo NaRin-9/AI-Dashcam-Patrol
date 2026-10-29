@@ -1,0 +1,169 @@
+/* ---------- Log In / Reset Password ---------- */
+:root {
+  --magenta: #c60da0;
+  --magenta-tab: #96066f;
+}
+
+.auth {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 56px 16px;
+  background: var(--purple) url('../assets/world-map.svg') center 60% / cover no-repeat;
+}
+
+/* แผ่นซ้อนด้านหลังการ์ด (แผ่นสีเข้มสองชั้นที่โผล่ขึ้นมาด้านบน) */
+.auth-stack {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 520px);
+}
+.auth-stack::before,
+.auth-stack::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  height: 48px;
+  border-radius: 18px 18px 0 0;
+}
+.auth-stack::before {
+  top: -20px;
+  left: 7%;
+  right: 7%;
+  background: var(--purple-dark);
+}
+.auth-stack::after {
+  top: -10px;
+  left: 3.5%;
+  right: 3.5%;
+  background: var(--magenta-tab);
+}
+
+.auth-sheet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px clamp(24px, 8vw, 64px) 64px;
+  border-radius: 20px;
+  background: var(--magenta);
+  box-shadow: 0 24px 60px rgba(30, 0, 25, 0.4);
+}
+.auth-logo {
+  width: 98px;
+  height: auto;
+}
+.auth-title {
+  margin: 20px 0 48px;
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.auth-form {
+  width: 100%;
+  max-width: 332px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.field {
+  width: 100%;
+  margin-bottom: 22px;
+}
+.field label {
+  display: block;
+  margin: 0 0 6px 4px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.field-box {
+  display: flex;
+  align-items: center;
+  height: 47px;
+  padding: 0 8px 0 24px;
+  border-radius: 16px;
+  background: var(--white);
+}
+.field-box:focus-within {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+.field-box input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 1rem var(--font); /* 16px กัน iOS ซูมเอง */
+  color: #2a2a2a;
+}
+.field-box input::placeholder {
+  color: #c4c4c4;
+}
+.field-box:has(input[aria-invalid='true']) {
+  outline: 3px solid #ffd54a;
+  outline-offset: 2px;
+}
+.field-eye {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #b0b0b0;
+  cursor: pointer;
+}
+.field-eye:hover {
+  color: #8a8a8a;
+}
+.field-error {
+  margin: 6px 0 0 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff3b0;
+}
+
+.auth-btn {
+  width: 164px;
+  height: 40px;
+  margin-top: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  cursor: pointer;
+}
+.auth-link {
+  margin-top: 8px;
+  padding: 4px;
+  font-size: 1.125rem;
+  color: #000;
+  text-decoration: underline;
+}
+
+/* มือถือ: แผ่นเต็มจอ ติดขอบล่าง */
+@media (max-width: 560px) {
+  .auth {
+    display: block;
+    padding: 28px 0 0;
+  }
+  .auth-stack {
+    width: 100%;
+  }
+  .auth-sheet {
+    min-height: calc(100vh - 28px);
+    min-height: calc(100dvh - 28px);
+    padding: 72px 24px 48px;
+    border-radius: 18px 18px 0 0;
+    box-shadow: none;
+  }
+}

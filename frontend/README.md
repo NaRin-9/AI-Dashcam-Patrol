@@ -23,11 +23,13 @@ src/
 │  ├─ LiveMap/
 │  ├─ RiskReports/
 │  ├─ HowItWorks/
+│  ├─ Welcome/     หน้าต้อนรับ (/welcome)
 │  ├─ Login/
+│  ├─ ResetPassword/
 │  └─ NotFound/
 ├─ components/     ส่วนประกอบที่ใช้หลายหน้า
 │  ├─ layout/      Layout.jsx, Navbar.jsx
-│  └─ ui/          ปุ่ม การ์ด ฯลฯ (ตอนนี้มี PagePlaceholder)
+│  └─ ui/          PagePlaceholder, AuthShell, TextField (ฟอร์ม)
 ├─ services/       api.js จุดเดียวที่เรียก backend
 ├─ hooks/          custom hooks ที่ใช้ร่วมกัน
 ├─ utils/          ฟังก์ชันช่วยทั่วไป
@@ -35,6 +37,10 @@ src/
 └─ styles/         global.css สีหลัก #74045F, #C7911B
 public/            ไฟล์ที่ใช้ตรงๆ เช่น favicon.png
 ```
+
+หน้าแรก `/` บนมือถือ (กว้างไม่เกิน 760px) แสดงหน้า Welcome แทน Hero ผ่าน `phoneElement` ใน routes
+
+route ที่ใส่ `bare: true` จะแสดงเต็มจอโดยไม่มี Navbar
 
 หน้าที่ยังไม่มีเนื้อหาแสดง `PagePlaceholder` ไว้ก่อน ลบออกเมื่อเริ่มทำหน้านั้น
 
