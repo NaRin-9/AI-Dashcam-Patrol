@@ -14,10 +14,10 @@ npm run build    # สร้างไฟล์เว็บใน dist/ (เป�
 src/
 ├─ main.jsx        จุดเริ่มของแอป
 ├─ app/
-│  └─ App.jsx      เลือกหน้าที่จะแสดงตาม URL
+│  └─ App.jsx      ตั้ง <Routes> จากรายการใน routes/index.jsx
 ├─ routes/
 │  ├─ index.jsx    รายการหน้าทั้งหมดและเมนู (เพิ่มหน้าใหม่ที่นี่)
-│  └─ router.jsx   ตัวเปลี่ยนหน้าแบบ #/path และ <Link>
+│  └─ router.jsx   ตัวห่อ react-router-dom (HashRouter, Link, usePath)
 ├─ pages/          1 โฟลเดอร์ = 1 หน้า
 │  ├─ Home/        HomePage.jsx + components/Hero.jsx
 │  ├─ LiveMap/
@@ -53,7 +53,7 @@ route ที่ใส่ `bare: true` จะแสดงเต็มจอโด
 ## เปลี่ยนหน้า
 
 ใช้ `<Link to="/live-map">` จาก `@/routes/router` แทน `<a href>`
-router นี้เขียนเองแบบเล็กเพราะติดตั้งแพ็กเกจเพิ่มไม่ได้ในตอนตั้งโปรเจกต์
-ถ้าทีมอยากใช้ react-router-dom ภายหลัง แก้เฉพาะ `src/routes/router.jsx` และ `src/app/App.jsx`
+โปรเจกต์ใช้ react-router-dom แบบ HashRouter (URL เป็น `#/live-map`) เพื่อให้เปิดไฟล์ใน `dist/` ได้ตรงๆ
+ถ้าภายหลังมีเซิร์ฟเวอร์รองรับ เปลี่ยนเป็น BrowserRouter ได้ที่ `src/routes/router.jsx` ที่เดียว
 
 ฟอนต์: Inter (อังกฤษ) + Noto Sans Thai (ไทย)

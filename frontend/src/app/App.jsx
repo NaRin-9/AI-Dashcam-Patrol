@@ -1,19 +1,45 @@
 import Layout from '@/components/layout/Layout'
+import useMediaQuery from '@/hooks/useMediaQuery'
 import NotFoundPage from '@/pages/NotFound'
 import { routes } from '@/routes'
-import { usePath } from '@/routes/router'
-import useMediaQuery from '@/hooks/useMediaQuery'
+import { Route, Router, Routes, ScrollToTop } from '@/routes/router'
 
-export default function App() {
-  const path = usePath()
-  const route = routes.find((r) => r.path === path)
+function AppRoutes() {
   const isPhone = useMediaQuery('(max-width: 760px)')
 
-  // หน้าที่มี phoneElement จะแสดงแบบนั้นแทนบนมือถือ (เต็มจอ ไม่มี Navbar)
-  if (isPhone && route?.phoneElement) return route.phoneElement
+  return (
+    <Routes>
+      {routes.map((r) => {
+        // หน้าที่มี phoneElement จะแสดงแบบนั้นแทนบนมือถือ (เต็มจอ ไม่มี Navbar)
+        const onPhone = isPhone && r.phoneElement
+        const element = onPhone ? r.phoneElement : r.element
+        // หน้า bare (Welcome / Log In / Reset Password) แสดงเต็มจอ ไม่มี Navbar
+        const bare = r.bare || onPhone
+        return (
+          <Route
+            key={r.path}
+            path={r.path}
+            element={bare ? element : <Layout>{element}</Layout>}
+          />
+        )
+      })}
+      <Route
+        path="*"
+        element={
+          <Layout>
+            <NotFoundPage />
+          </Layout>
+        }
+      />
+    </Routes>
+  )
+}
 
-  // หน้า bare (Welcome / Log In / Reset Password) แสดงเต็มจอ ไม่มี Navbar
-  if (route?.bare) return route.element
-
-  return <Layout>{route ? route.element : <NotFoundPage />}</Layout>
+export default function App() {
+  return (
+    <Router>
+      <ScrollToTop />
+      <AppRoutes />
+    </Router>
+  )
 }
