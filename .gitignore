@@ -24,8 +24,10 @@ data/
 .idea/
 .DS_Store
 Thumbs.db
-
+.claude/
+.trail/
 # ไฟล์ที่รอลบ
 _to_delete/
-
+docker-compose.yaml
+login.md
 CLAUDE.md

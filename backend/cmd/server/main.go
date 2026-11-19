@@ -1,35 +1,73 @@
-// จุดเริ่มของ backend: อ่านค่าตั้งค่า สร้าง routes แล้วเปิดเซิร์ฟเวอร์
+// จุดเริ่มของ backend: โหลด config, เชื่อมต่อฐานข้อมูล, migrate, และเปิด Gin web server
 package main
 
 import (
 	"log"
 	"net/http"
-	"os"
 	"time"
 
+	"github.com/joho/godotenv"
+
+	"ai-dashcam-patrol/backend/internal/config"
+	"ai-dashcam-patrol/backend/internal/controllers"
+	"ai-dashcam-patrol/backend/internal/database"
 	"ai-dashcam-patrol/backend/internal/routes"
+	"ai-dashcam-patrol/backend/internal/services"
 )
 
 func main() {
-	// ค่าตั้งค่าจาก environment variable (ดู .env.example)
-	port := getenv("PORT", "8000")
-	allowedOrigin := getenv("ALLOWED_ORIGIN", "http://localhost:5173")
+	// โหลดไฟล์ .env โดยค้นหาทั้งใน directory ปัจจุบันและ backend/.env
+	_ = godotenv.Load(".env", "backend/.env", "../.env")
+
+	// โหลดค่า config
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("failed to load configuration: %v", err)
+	}
+
+	// เชื่อมต่อฐานข้อมูล PostgreSQL
+	db, err := database.Connect(cfg)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	// รัน database migration
+	if err := database.Migrate(db); err != nil {
+		log.Fatalf("failed to run database migration: %v", err)
+	}
+
+	// Seed superadmin เริ่มต้นถ้ายังไม่มี
+	if err := database.SeedSuperadmin(db); err != nil {
+		log.Printf("warning: failed to seed default superadmin: %v", err)
+	}
+
+	// สร้าง Service instances
+	authService := services.NewAuthService(db, cfg)
+	userService := services.NewUserService(db)
+
+	// สร้าง Controller instances
+	authController := controllers.NewAuthController(authService, userService)
+	userController := controllers.NewUserController(userService)
+	riskReportsController := controllers.NewRiskReportsController()
+
+	// กำหนด Routes และ Engine
+	router := routes.Setup(routes.Dependencies{
+		AuthController:        authController,
+		UserController:        userController,
+		RiskReportsController: riskReportsController,
+		JWTSecret:             cfg.JWTSecret,
+		AllowedOrigin:         cfg.AllowedOrigin,
+	})
 
 	srv := &http.Server{
-		Addr:              ":" + port,
-		Handler:           routes.New(allowedOrigin),
+		Addr:              ":" + cfg.Port,
+		Handler:           router,
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	log.Printf("backend listening on http://localhost:%s", port)
+	log.Printf("backend listening on http://localhost:%s", cfg.Port)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
-}
-
-func getenv(key, fallback string) string {
-	if v := os.Getenv(key); v != "" {
-		return v
-	}
-	return fallback
 }
