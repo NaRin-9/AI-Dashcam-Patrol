@@ -14,6 +14,8 @@ go run ./cmd/server
 เซิร์ฟเวอร์เปิดที่ http://localhost:8000 ตรวจได้ที่ http://localhost:8000/api/health
 frontend (`npm run dev`) ส่งคำขอ `/api/...` มาที่พอร์ตนี้ให้อัตโนมัติ
 
+ตั้ง `FRONTEND_DIR` ไปยังโฟลเดอร์ `frontend/dist` ที่ build แล้วเพื่อเสิร์ฟเว็บจาก Go ด้วย ดูตัวอย่างการรันใน [README หลัก](../README.md#รันเว็บที่-build-แล้ว)
+
 คำสั่งอื่น: `go test ./...` รันเทสต์, `go fmt ./...` จัดรูปแบบโค้ด, `go build -o bin/server ./cmd/server` สร้างไฟล์โปรแกรม
 
 ## โครงสร้าง
@@ -34,7 +36,7 @@ backend/
 │  │  └─ riskreports.go
 │  └─ entities/              รูปแบบข้อมูลของระบบ
 │     └─ entities.go         RiskSpan, Track, LiveMap
-├─ .env.example              PORT, ALLOWED_ORIGIN
+├─ .env.example              PORT, ALLOWED_ORIGIN, FRONTEND_DIR
 └─ go.mod
 ```
 
@@ -68,7 +70,7 @@ frontend → routes → controller → service → (ฐานข้อมูล)
 |---|---|---|---|
 | GET | `/api/health` | – | ใช้ได้ |
 | GET | `/api/risk-reports` | RiskReports | คืนรายการว่าง รอฐานข้อมูล |
-| GET | `/api/live-map` | LiveMap | คืนข้อมูลว่าง รอฐานข้อมูล |
+| GET | `/api/live-map` | LiveMap | คืนข้อมูลจำลอง รอฐานข้อมูล |
 
 ## เพิ่ม endpoint ใหม่
 

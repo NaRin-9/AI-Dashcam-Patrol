@@ -15,9 +15,18 @@ func main() {
 	port := getenv("PORT", "8000")
 	allowedOrigin := getenv("ALLOWED_ORIGIN", "http://localhost:5173")
 
+	handler := routes.New(allowedOrigin)
+	if frontendDir := os.Getenv("FRONTEND_DIR"); frontendDir != "" {
+		var err error
+		handler, err = routes.WithFrontend(handler, os.DirFS(frontendDir))
+		if err != nil {
+			log.Fatalf("FRONTEND_DIR %q: %v", frontendDir, err)
+		}
+	}
+
 	srv := &http.Server{
 		Addr:              ":" + port,
-		Handler:           routes.New(allowedOrigin),
+		Handler:           handler,
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

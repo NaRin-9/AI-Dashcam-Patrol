@@ -20,8 +20,18 @@ type Track struct {
 	Points [][2]float64 `json:"points"`
 }
 
+// RiskCaseMarker คือจุดเสี่ยงที่ยืนยันแล้วสำหรับแผนที่ (พิกัด [lng, lat])
+type RiskCaseMarker struct {
+	ID                string     `json:"id"`
+	ConfirmedLocation [2]float64 `json:"confirmedLocation"`
+	RiskLevel         string     `json:"riskLevel"`
+	CapturedAt        string     `json:"capturedAt"`
+}
+
 // LiveMap คือข้อมูลทั้งหมดที่หน้าแผนที่ใช้
 type LiveMap struct {
-	Tracks []Track    `json:"tracks"`
-	Spans  []RiskSpan `json:"spans"`
+	Demo   bool             `json:"demo"`
+	Tracks []Track          `json:"tracks"`
+	Spans  []RiskSpan       `json:"spans"`
+	Cases  []RiskCaseMarker `json:"cases"`
 }

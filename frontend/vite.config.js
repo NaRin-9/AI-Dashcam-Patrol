@@ -4,8 +4,6 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   plugins: [react()],
-  // relative path: เปิดไฟล์ใน dist/ ได้โดยไม่ต้องมีเซิร์ฟเวอร์
-  base: './',
   resolve: {
     // import จาก src ได้ด้วย '@/...' แทน '../../..'
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },

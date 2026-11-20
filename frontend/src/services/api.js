@@ -2,8 +2,8 @@
 // ตั้งค่า URL ได้ในไฟล์ .env (ดู .env.example) ถ้าไม่ตั้ง จะเรียก /api ผ่าน proxy ของ Vite
 const BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
-export async function apiGet(path) {
-  const res = await fetch(`${BASE_URL}${path}`)
+export async function apiGet(path, { signal } = {}) {
+  const res = await fetch(`${BASE_URL}${path}`, { signal })
   if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`)
   return res.json()
 }
