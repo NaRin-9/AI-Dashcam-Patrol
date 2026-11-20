@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
         <TextField
           id="username"
           label="Username"
-          placeholder="e.g. supanat.tang"
+          placeholder="Username"
           autoComplete="username"
           value={values.username}
           onChange={onChange}

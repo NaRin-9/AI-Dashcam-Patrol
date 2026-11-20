@@ -1,8 +1,8 @@
 // ตัวห่อ react-router-dom ไว้จุดเดียว หน้าอื่นๆ import จากไฟล์นี้ (`@/routes/router`)
 import { useEffect } from 'react'
-import { BrowserRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
-export { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation }
+export { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate }
 
 // path ปัจจุบัน เช่น '/login'
 export function usePath() {

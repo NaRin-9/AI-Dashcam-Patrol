@@ -14,7 +14,7 @@ func TestWithFrontendRoutes(t *testing.T) {
 		"index.html":    {Data: []byte(appShell)},
 		"assets/app.js": {Data: []byte("console.log('app')")},
 	}
-	handler, err := WithFrontend(New("http://localhost:5173"), files)
+	handler, err := WithFrontend(Setup(Dependencies{AllowedOrigin: "http://localhost:5173"}), files)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,8 +32,8 @@ func TestWithFrontendRoutes(t *testing.T) {
 		{http.MethodGet, "/assets/app.js", http.StatusOK, "console.log('app')"},
 		{http.MethodGet, "/assets/missing", http.StatusNotFound, "404 page not found\n"},
 		{http.MethodGet, "/missing.png", http.StatusNotFound, "404 page not found\n"},
-		{http.MethodGet, "/api/health", http.StatusOK, "{\"status\":\"ok\"}\n"},
-		{http.MethodGet, "/api/missing", http.StatusNotFound, "404 page not found\n"},
+		{http.MethodGet, "/api/health", http.StatusOK, "{\"status\":\"ok\"}"},
+		{http.MethodGet, "/api/missing", http.StatusNotFound, "404 page not found"},
 		{http.MethodPost, "/live-map", http.StatusMethodNotAllowed, "Method Not Allowed\n"},
 	}
 
@@ -49,7 +49,7 @@ func TestWithFrontendRoutes(t *testing.T) {
 }
 
 func TestWithFrontendRequiresIndex(t *testing.T) {
-	_, err := WithFrontend(New(""), fstest.MapFS{})
+	_, err := WithFrontend(http.NewServeMux(), fstest.MapFS{})
 	if err == nil || !strings.Contains(err.Error(), "index.html") {
 		t.Fatalf("error = %v, want missing index.html error", err)
 	}

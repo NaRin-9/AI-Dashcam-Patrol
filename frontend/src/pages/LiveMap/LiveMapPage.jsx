@@ -87,7 +87,11 @@ export default function LiveMapPage() {
       .then((data) => {
         if (request.signal.aborted) return
         const hasData = addSurveyLayers(map, data)
-        setSurvey({ demo: data.demo, hasData })
+        setSurvey({
+          demo: data.demo,
+          hasData,
+          hasTracks: data.tracks.some((track) => track.points.length >= 2),
+        })
       })
       .catch(() => {
         if (!request.signal.aborted) setSurvey({ error: true })
@@ -107,7 +111,9 @@ export default function LiveMapPage() {
       </header>
       {survey?.hasData && (
         <ul className="live-map-legend" aria-label="คำอธิบายสัญลักษณ์แผนที่">
-          <li><span className="live-map-key-track" aria-hidden="true" />เส้นทางรถ</li>
+          {survey.hasTracks && (
+            <li><span className="live-map-key-track" aria-hidden="true" />เส้นทางรถ</li>
+          )}
           <li><span className="live-map-key-point" aria-hidden="true" />{riskLabels.near}</li>
           <li><span className="live-map-key-point is-touching" aria-hidden="true" />{riskLabels.touching}</li>
         </ul>

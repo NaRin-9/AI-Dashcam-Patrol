@@ -59,7 +59,7 @@ AI-Dashcam-Patrol/
 
 ## เริ่มต้นใช้งาน
 
-ต้องมี Node.js 20 ขึ้นไป และ Go 1.22 ขึ้นไป เปิด 2 terminal
+ต้องมี Node.js และ Go 1.26 ขึ้นไป เตรียม PostgreSQL และตั้งค่า `backend/.env` ตาม [วิธีตั้งค่าระบบล็อกอิน](backend/README.md#ตั้งค่าฐานข้อมูลและล็อกอิน) ก่อนเปิด 2 terminal
 
 ```bash
 # terminal 1: backend → http://localhost:8000
@@ -94,7 +94,7 @@ Go จะเสิร์ฟหน้าเว็บและ `/api/...` จา�
 |---|---|---|
 | GET | `/api/health` | – |
 | GET | `/api/risk-reports` | RiskReports (ยังคืนข้อมูลว่าง) |
-| GET | `/api/live-map` | LiveMap (คืนข้อมูลจำลอง) |
+| GET | `/api/live-map` | LiveMap หลังล็อกอิน (คืนข้อมูลจำลอง และส่งเส้นทางรถเฉพาะ Admin/Superadmin) |
 
 รายละเอียดเพิ่มเติม: [frontend/README.md](frontend/README.md), [backend/README.md](backend/README.md)
 
