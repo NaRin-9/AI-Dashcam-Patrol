@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import LoadingOverlay from '@/components/ui/LoadingOverlay'
 import { Link } from '@/routes/router'
 import { useAuth } from '@/contexts/AuthContext'
+import logo from '@/assets/pea-logo.png'
 import phone from '@/assets/phone.svg'
 
 export default function LoginPage() {
@@ -96,10 +97,10 @@ export default function LoginPage() {
         <div className="login-clean-center-box">
           {/* Top Bar: Security Badge + Language Switch */}
           <div className="login-clean-topbar">
-            <div className="login-clean-sec-pill">
+            {/* <div className="login-clean-sec-pill">
               <span className="clean-sec-dot" />
               <span>{isTH ? 'การเชื่อมต่อปลอดภัย (PEA Official Portal)' : 'Secure Connection (PEA Official Portal)'}</span>
-            </div>
+            </div> */}
 
             <button
               type="button"
@@ -119,14 +120,10 @@ export default function LoginPage() {
           {/* Brand Header */}
           <div className="login-clean-brand">
             <div className="login-clean-emblem">
-              <svg viewBox="0 0 100 100" className="clean-emblem-svg">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="#F59E0B" strokeWidth="3" strokeDasharray="4 2" />
-                <circle cx="50" cy="50" r="36" fill="#FFFFFF" fillOpacity="0.12" stroke="#FCD34D" strokeWidth="1.5" />
-                <path d="M54 20 L34 52 H49 L45 80 L67 46 H52 Z" fill="#FBBF24" stroke="#FFFBEB" strokeWidth="1.5" strokeLinejoin="round" />
-              </svg>
+              <img src={logo} alt="การไฟฟ้าส่วนภูมิภาค" className="clean-emblem-img" />
             </div>
             <div className="login-clean-brand-info">
-              <span className="login-clean-tag">PEA FLEET & GIS</span>
+              {/* <span className="login-clean-tag">PEA FLEET & GIS</span> */}
               <h1 className="login-clean-org">
                 {isTH ? 'การไฟฟ้าส่วนภูมิภาค' : 'Provincial Electricity Authority'}
               </h1>

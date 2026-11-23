@@ -5,6 +5,11 @@
   --gold-hover: #d9a12a;
   --white: #ffffff;
 
+  /* Figma Top-to-Bottom Fade Gradient (32% #74045F -> 64% #A70689 -> 89% #DA08B3) */
+  --bg-gradient-fade: linear-gradient(180deg, #74045f 0%, #74045f 32%, #a70689 64%, #da08b3 89%, #da08b3 100%);
+  --bg-map-gradient: url('../assets/world-map.svg') center 60% / cover no-repeat,
+                     linear-gradient(180deg, #74045f 0%, #74045f 32%, #a70689 64%, #da08b3 89%, #da08b3 100%);
+
   /* Inter covers Latin; Noto Sans Thai picks up the Thai glyphs */
   --font: 'Inter', 'Noto Sans Thai', 'Leelawadee UI', Tahoma, system-ui, sans-serif;
   --gutter: clamp(16px, 4.4vw, 80px);
@@ -62,7 +67,7 @@ a {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: var(--purple) url('../assets/world-map.svg') center 60% / cover no-repeat;
+  background: var(--bg-map-gradient);
 }
 
 .page > main {

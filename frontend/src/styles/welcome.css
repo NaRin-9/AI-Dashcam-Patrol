@@ -7,7 +7,7 @@
   grid-template-rows: auto 1fr auto;
   padding: clamp(24px, 6vw, 56px) 24px clamp(28px, 6vh, 56px);
   overflow: hidden;
-  background: var(--purple) url('../assets/world-map.svg') center 60% / cover no-repeat;
+  background: var(--bg-map-gradient);
 }
 .welcome-head {
   grid-area: head;

@@ -18,7 +18,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: row;
-  background: var(--purple);
+  background: var(--bg-map-gradient);
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -28,10 +28,20 @@
 
 /* ================= LEFT: Clean White Vertically & Horizontally Centered ================= */
 .login-clean-left {
+  /* -------------------------------------------------------------
+   * ปรับแต่งสีพื้นหลังและความโปร่งใส (Opacity) ฝั่งซ้ายได้ที่นี่:
+   * 1. --login-left-bg-rgb: ค่าสี RGB (เช่น 255, 255, 255 สำหรับสีขาว)
+   * 2. --login-left-opacity: ค่าความโปร่งใส (0 ถึง 1 เช่น 1 = ทึบ, 0.9 = โปร่งใส 10%)
+   * ------------------------------------------------------------- */
+  --login-left-bg-rgb: 0, 0, 0;
+  --login-left-opacity: 0.3;
+
+  background: rgba(var(--login-left-bg-rgb), var(--login-left-opacity));
+  backdrop-filter: blur(0.5px);
+  -webkit-backdrop-filter: blur(16px);
   width: 48%;
   min-width: 440px;
   height: 100vh;
-  background: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -55,8 +65,8 @@
 .login-clean-topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24px;
+  justify-content: flex-end;
+  margin-bottom: 12px;
 }
 
 .login-clean-sec-pill {
@@ -82,7 +92,7 @@
 
 .login-clean-lang-btn {
   display: inline-flex;
-  align-items: center;
+  align-items: left;
   gap: 6px;
   padding: 4px 8px;
   border-radius: 6px;
@@ -113,20 +123,20 @@
 }
 
 .login-clean-emblem {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #74045f 0%, #4a023d 100%);
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 6px 16px rgba(116, 4, 95, 0.22);
 }
 
-.clean-emblem-svg {
-  width: 42px;
-  height: 42px;
+.clean-emblem-img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(116, 4, 95, 0.25));
 }
 
 .login-clean-brand-info {
@@ -151,14 +161,14 @@
   margin: 0;
   font-size: 1.28rem;
   font-weight: 800;
-  color: #1a0518;
+  color: #ffffff;
   line-height: 1.25;
 }
 
 .login-clean-sub {
   margin: 2px 0 0;
   font-size: 0.76rem;
-  color: #64748b;
+  color: #8d8e90;
   font-weight: 500;
 }
 
@@ -171,13 +181,14 @@
   margin: 0 0 5px;
   font-size: 1.6rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .login-clean-desc {
   margin: 0;
   font-size: 0.84rem;
-  color: #64748b;
+  color: #8d8e90;
+  font-weight: 500;
   line-height: 1.4;
 }
 
@@ -217,7 +228,7 @@
   display: block;
   font-size: 0.84rem;
   font-weight: 600;
-  color: #334155;
+  color: #8d8e90;
   margin-bottom: 6px;
   text-align: left;
 }
@@ -329,7 +340,7 @@
   cursor: pointer;
   user-select: none;
   font-size: 0.84rem;
-  color: #475569;
+  color: #ffffff;
 }
 
 .login-clean-checkbox input {
@@ -343,7 +354,7 @@
 .login-clean-forgot {
   font-size: 0.84rem;
   font-weight: 600;
-  color: #74045f;
+  color: #ffffff;
   text-decoration: none;
   transition: color 0.15s;
 }
@@ -396,29 +407,33 @@
   transform: translateX(4px);
 }
 
-/* ================= RIGHT: Purple World Map with Phone ================= */
+/* ================= RIGHT: Phone Mockup ================= */
 .login-clean-right {
   flex: 1;
   height: 100vh;
   overflow: hidden;
   position: relative;
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  background: var(--purple) url('../assets/world-map.svg') center 60% / cover no-repeat,
-              linear-gradient(135deg, #5E0050 0%, #C0189A 100%);
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .login-clean-phone-img {
-  height: 92vh;
-  max-height: 860px;
+  height: 112vh;
+  max-height: none;
   width: auto;
+  max-width: none;
   object-fit: contain;
-  object-position: bottom right;
-  margin-bottom: -50px;
-  margin-right: -10px;
+  object-position: center;
+  margin: 0;
   user-select: none;
   pointer-events: none;
+  filter: drop-shadow(0 25px 50px rgba(20, 0, 20, 0.6));
+  transform: scale(1.15) translate(3%, 1%);
+  transform-origin: center center;
 }
 
 /* ================= Responsive Breakpoints ================= */
@@ -432,8 +447,10 @@
   .login-clean-left {
     width: 100%;
     min-width: 0;
+    max-width: none;
     height: auto;
     min-height: 100vh;
+    border-radius: 0;
     padding: 40px 24px;
     box-shadow: none;
   }
@@ -448,7 +465,7 @@
   display: grid;
   place-items: center;
   padding: 56px 16px;
-  background: var(--purple) url('../assets/world-map.svg') center 60% / cover no-repeat;
+  background: var(--bg-map-gradient);
 }
 
 /* แผ่นซ้อนด้านหลังการ์ด (แผ่นสีเข้มสองชั้นที่โผล่ขึ้นมาด้านบน) */
