@@ -59,7 +59,6 @@ AI-Dashcam-Patrol/
 
 ## เริ่มต้นใช้งาน
 
-ต้องมี Node.js 20 ขึ้นไป และ Go 1.22 ขึ้นไป เปิด 2 terminal
 
 ```bash
 # terminal 1: backend → http://localhost:8000
