@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import AuthShell from '@/components/ui/AuthShell'
 import TextField, { PasswordField } from '@/components/ui/TextField'
+import LoadingOverlay from '@/components/ui/LoadingOverlay'
 import { Link, useNavigate } from '@/routes/router'
 import { useAuth } from '@/contexts/AuthContext'
 import logo from '@/assets/pea-logo.png'
@@ -8,7 +9,7 @@ import phone from '@/assets/phone.svg'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, user, isAuthenticated } = useAuth()
   const [values, setValues] = useState({ username: '', password: '' })
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -22,14 +23,14 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.role === 'superadmin') {
-        window.location.hash = '#/superadmin'
+        navigate('/superadmin', { replace: true })
       } else if (user.role === 'admin') {
-        window.location.hash = '#/admin'
+        navigate('/admin', { replace: true })
       } else {
-        window.location.hash = '#/dashboard'
+        navigate('/dashboard', { replace: true })
       }
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user, navigate])
 
   const onChange = (e) => {
     setValues((v) => ({ ...v, [e.target.name]: e.target.value }))
