@@ -31,3 +31,7 @@ _to_delete/
 docker-compose.yaml
 login.md
 CLAUDE.md
+.gemini
+AGENTS.md
+GEMINI.md
+.agents/
