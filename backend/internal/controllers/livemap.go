@@ -3,14 +3,19 @@ package controllers
 import (
 	"net/http"
 
-	"ai-dashcam-patrol/backend/internal/entities"
+	"github.com/gin-gonic/gin"
+
+	"ai-dashcam-patrol/backend/internal/entities/livemap"
+	"ai-dashcam-patrol/backend/internal/services"
 )
 
 // GetLiveMap คืนข้อมูลสำหรับแผนที่: GET /api/live-map
-// ใช้กับหน้า frontend/src/pages/LiveMap (ยังเป็นข้อมูลว่าง)
-func GetLiveMap(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, entities.LiveMap{
-		Tracks: []entities.Track{},
-		Spans:  []entities.RiskSpan{},
-	})
+func GetLiveMap(c *gin.Context) {
+	liveMap := services.DemoLiveMap()
+	switch c.GetString("roleName") {
+	case "admin", "superadmin":
+	default:
+		liveMap.Tracks = []livemap.Track{}
+	}
+	c.JSON(http.StatusOK, liveMap)
 }

@@ -7,11 +7,11 @@
 
 | หน้า | โฟลเดอร์ | URL | ผู้รับผิดชอบ |
 |---|---|---|---|
-| หน้าแรก | `pages/Home` | `#/` | |
-| แผนที่ | `pages/LiveMap` | `#/live-map` | |
-| รายงานความเสี่ยง | `pages/RiskReports` | `#/risk-reports` | |
-| วิธีการทำงาน | `pages/HowItWorks` | `#/how-it-works` | |
-| เข้าสู่ระบบ | `pages/Login` | `#/login` | |
+| หน้าแรก | `pages/Home` | `/` | |
+| แผนที่ | `pages/LiveMap` | `/live-map` | |
+| รายงานความเสี่ยง | `pages/RiskReports` | `/risk-reports` | |
+| วิธีการทำงาน | `pages/HowItWorks` | `/how-it-works` | |
+| เข้าสู่ระบบ | `pages/Login` | `/login` | |
 
 ไฟล์ที่ใช้ร่วมกันหลายหน้า แก้แล้วให้บอกทีม
 - `frontend/src/routes/index.jsx` รายการหน้าและเมนู
@@ -31,7 +31,7 @@
 2. logic เขียนใน `internal/services/<เรื่อง>.go`
 3. controller เขียนใน `internal/controllers/<เรื่อง>.go`
 4. เพิ่ม 1 บรรทัดใน `internal/routes/routes.go`
-5. รัน `go fmt ./...` และ `go test ./...` ก่อน commit
+5. รัน `go fmt ./...` และ `go build ./...` ก่อน commit
 
 ## Git
 

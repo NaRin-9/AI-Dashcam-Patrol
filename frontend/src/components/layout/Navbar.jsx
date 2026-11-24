@@ -2,10 +2,12 @@ import { useState } from 'react'
 import logo from '@/assets/pea-logo.png'
 import { routes } from '@/routes'
 import { Link, usePath } from '@/routes/router'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const path = usePath()
+  const { user, isAuthenticated, isAdminOrAbove, isSuperadmin, logout } = useAuth()
   const links = routes.filter((r) => r.showInNav)
 
   return (
@@ -38,11 +40,64 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
+
+          {/* Role-based navigation links */}
+          {isAuthenticated && (
+            <li>
+              <Link
+                to="/dashboard"
+                aria-current={path === '/dashboard' ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+              >
+                Dashboard
+              </Link>
+            </li>
+          )}
+          {isAdminOrAbove && (
+            <li>
+              <Link
+                to="/admin"
+                aria-current={path === '/admin' ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+              >
+                Admin
+              </Link>
+            </li>
+          )}
+          {isSuperadmin && (
+            <li>
+              <Link
+                to="/superadmin"
+                aria-current={path === '/superadmin' ? 'page' : undefined}
+                onClick={() => setOpen(false)}
+              >
+                Super Admin
+              </Link>
+            </li>
+          )}
         </ul>
         <span className="nav-divider" aria-hidden="true" />
-        <Link className="btn btn-gold btn-sm" to="/login" onClick={() => setOpen(false)}>
-          Log In
-        </Link>
+        {isAuthenticated ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '0.9rem', color: '#fff', opacity: 0.9 }}>
+              {user?.username} ({user?.role})
+            </span>
+            <button
+              className="btn btn-gold btn-sm"
+              onClick={() => {
+                setOpen(false)
+                logout()
+              }}
+              style={{ border: 'none', cursor: 'pointer' }}
+            >
+              Log Out
+            </button>
+          </div>
+        ) : (
+          <Link className="btn btn-gold btn-sm" to="/login" onClick={() => setOpen(false)}>
+            Log In
+          </Link>
+        )}
       </nav>
     </header>
   )
