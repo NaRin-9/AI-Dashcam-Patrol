@@ -107,6 +107,39 @@ export async function apiDelete(path) {
   return apiFetch(path, { method: 'DELETE' })
 }
 
+export async function uploadVideo(file, onProgress) {
+  const form = new FormData()
+  form.append('video', file)
+
+  function send() {
+    return new Promise((resolve, reject) => {
+      const request = new XMLHttpRequest()
+      request.open('POST', `${BASE_URL}/videos`)
+      request.withCredentials = true
+      request.responseType = 'json'
+      if (accessToken) request.setRequestHeader('Authorization', `Bearer ${accessToken}`)
+      request.upload.onprogress = (event) => {
+        if (event.lengthComputable) onProgress(Math.floor(event.loaded / event.total * 100))
+      }
+      request.onload = () => {
+        if (request.status === 201) resolve(request.response)
+        else reject(new ApiError(request.status, request.response ?? { error: 'อัปโหลดไม่สำเร็จ' }))
+      }
+      request.onerror = () => reject(new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาลองอีกครั้ง'))
+      request.send(form)
+    })
+  }
+
+  try {
+    return await send()
+  } catch (error) {
+    if (error.status !== 401) throw error
+    if (!await tryRefresh()) throw new Error('กรุณาเข้าสู่ระบบใหม่แล้วลองอีกครั้ง')
+    onProgress(0)
+    return send()
+  }
+}
+
 // Auth-specific API calls
 export const authApi = {
   login: (data) => apiPost('/auth/login', data),

@@ -12,11 +12,12 @@ import (
 
 // Dependencies รวบรวม controller ทั้งหมดที่ routes ต้องใช้
 type Dependencies struct {
-	AuthController      *controllers.AuthController
-	UserController      *controllers.UserController
-	RiskReportsController *controllers.RiskReportsController
-	JWTSecret           string
-	AllowedOrigin       string
+	AuthController         *controllers.AuthController
+	UserController         *controllers.UserController
+	RiskReportsController  *controllers.RiskReportsController
+	VideoUploadsController *controllers.VideoUploadsController
+	JWTSecret              string
+	AllowedOrigin          string
 }
 
 // Setup กำหนดเส้นทาง API ทั้งหมดด้วย Gin
@@ -53,6 +54,10 @@ func Setup(deps Dependencies) *gin.Engine {
 			// Data endpoints
 			authenticated.GET("/risk-reports", deps.RiskReportsController.ListRiskReports)
 			authenticated.GET("/live-map", controllers.GetLiveMap)
+			if deps.VideoUploadsController != nil {
+				authenticated.GET("/videos", deps.VideoUploadsController.ListMine)
+				authenticated.POST("/videos", deps.VideoUploadsController.Upload)
+			}
 
 			// Admin & Superadmin endpoints (จัดการผู้ใช้ทั่วไป)
 			admin := authenticated.Group("")

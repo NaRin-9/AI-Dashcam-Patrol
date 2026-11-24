@@ -1,12 +1,12 @@
 package services
 
-import "ai-dashcam-patrol/backend/internal/entities"
+import "ai-dashcam-patrol/backend/internal/entities/livemap"
 
 // DemoLiveMap คืนเส้นทางและเคสจำลองสำหรับทดลองหน้าแผนที่
-func DemoLiveMap() entities.LiveMap {
-	return entities.LiveMap{
+func DemoLiveMap() livemap.LiveMap {
+	return livemap.LiveMap{
 		Demo: true,
-		Tracks: []entities.Track{
+		Tracks: []livemap.Track{
 			{
 				ID:   "DEMO-TRACK-01",
 				Date: "2026-11-18",
@@ -22,8 +22,8 @@ func DemoLiveMap() entities.LiveMap {
 				},
 			},
 		},
-		Spans: []entities.RiskSpan{},
-		Cases: []entities.RiskCaseMarker{
+		Spans: []livemap.RiskSpan{},
+		Cases: []livemap.RiskCaseMarker{
 			{
 				ID:                "DEMO-001",
 				ConfirmedLocation: [2]float64{100.5355, 13.7254},

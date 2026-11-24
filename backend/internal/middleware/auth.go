@@ -8,7 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 
-	"ai-dashcam-patrol/backend/internal/entities"
+	"ai-dashcam-patrol/backend/internal/entities/auth"
+	"ai-dashcam-patrol/backend/internal/entities/user"
 )
 
 // AuthMiddleware ตรวจสอบ Bearer token จาก Authorization header แล้วตั้งค่า user info ใน context
@@ -29,7 +30,7 @@ func AuthMiddleware(jwtSecret string) gin.HandlerFunc {
 		}
 
 		tokenString := parts[1]
-		claims := &entities.TokenClaims{}
+		claims := &auth.TokenClaims{}
 
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -76,13 +77,13 @@ func RequireRole(roles ...string) gin.HandlerFunc {
 }
 
 // GetCurrentUser ดึงข้อมูล user จาก context
-func GetCurrentUser(c *gin.Context) entities.User {
+func GetCurrentUser(c *gin.Context) user.User {
 	userID, _ := c.Get("userId")
 	username, _ := c.Get("username")
 	roleID, _ := c.Get("roleId")
 	roleName, _ := c.Get("roleName")
 
-	return entities.User{
+	return user.User{
 		ID:       userID.(string),
 		Username: username.(string),
 		RoleID:   roleID.(int),

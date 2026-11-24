@@ -1,0 +1,7 @@
+package role
+
+// Role บทบาทของผู้ใช้
+type Role struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}

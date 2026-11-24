@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"ai-dashcam-patrol/backend/internal/entities"
+	"ai-dashcam-patrol/backend/internal/entities/auth"
 	"ai-dashcam-patrol/backend/internal/middleware"
 	"ai-dashcam-patrol/backend/internal/services"
 )
@@ -27,7 +27,7 @@ const refreshTokenMaxAge = 7 * 24 * 60 * 60
 
 // Register ลงทะเบียนผู้ใช้ใหม่: POST /api/auth/register
 func (ctrl *AuthController) Register(c *gin.Context) {
-	var req entities.RegisterRequest
+	var req auth.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -40,7 +40,7 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 	}
 
 	// Login อัตโนมัติหลังลงทะเบียน
-	loginReq := entities.LoginRequest{Username: req.Username, Password: req.Password}
+	loginReq := auth.LoginRequest{Username: req.Username, Password: req.Password}
 	resp, refreshToken, err := ctrl.authService.Login(c.Request.Context(), loginReq)
 	if err != nil {
 		// ลงทะเบียนสำเร็จแต่ login ไม่ได้ — ส่ง user กลับไปโดยไม่มี token
@@ -54,7 +54,7 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 
 // Login เข้าสู่ระบบ: POST /api/auth/login
 func (ctrl *AuthController) Login(c *gin.Context) {
-	var req entities.LoginRequest
+	var req auth.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

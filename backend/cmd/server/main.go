@@ -2,10 +2,13 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -18,8 +21,9 @@ import (
 )
 
 func main() {
-	// โหลดไฟล์ .env โดยค้นหาทั้งใน directory ปัจจุบันและ backend/.env
-	_ = godotenv.Load(".env", "backend/.env", "../.env")
+	if err := loadEnv(); err != nil {
+		log.Fatalf("failed to load environment: %v", err)
+	}
 
 	// โหลดค่า config
 	cfg, err := config.Load()
@@ -53,14 +57,16 @@ func main() {
 	authController := controllers.NewAuthController(authService, userService)
 	userController := controllers.NewUserController(userService)
 	riskReportsController := controllers.NewRiskReportsController()
+	videoUploadsController := controllers.NewVideoUploadsController(db, videoUploadDir())
 
 	// กำหนด Routes และ Engine
 	router := routes.Setup(routes.Dependencies{
-		AuthController:        authController,
-		UserController:        userController,
-		RiskReportsController: riskReportsController,
-		JWTSecret:             cfg.JWTSecret,
-		AllowedOrigin:         cfg.AllowedOrigin,
+		AuthController:         authController,
+		UserController:         userController,
+		RiskReportsController:  riskReportsController,
+		VideoUploadsController: videoUploadsController,
+		JWTSecret:              cfg.JWTSecret,
+		AllowedOrigin:          cfg.AllowedOrigin,
 	})
 
 	var handler http.Handler = router
@@ -82,4 +88,37 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
+}
+
+func videoUploadDir() string {
+	if dir := os.Getenv("VIDEO_UPLOAD_DIR"); dir != "" {
+		return dir
+	}
+	for _, candidate := range []string{"backend", ".", "..", "../.."} {
+		if _, err := os.Stat(filepath.Join(candidate, "go.mod")); err == nil {
+			return filepath.Join(candidate, "data", "videos")
+		}
+	}
+	return filepath.Join("data", "videos")
+}
+
+func loadEnv() error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	files := []string{".env", "backend/.env"}
+	if filepath.Base(cwd) == "server" && filepath.Base(filepath.Dir(cwd)) == "cmd" {
+		files = append(files, "../../.env")
+	}
+	files = append(files, "../.env")
+
+	// โหลดทีละไฟล์เพื่อข้ามพาธที่ไม่มีและรักษาค่าที่ตั้งจาก environment ไว้
+	for _, file := range files {
+		if err := godotenv.Load(file); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("load %s: %w", file, err)
+		}
+	}
+	return nil
 }

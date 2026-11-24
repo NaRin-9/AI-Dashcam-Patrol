@@ -4,11 +4,11 @@ package services
 import (
 	"context"
 
-	"ai-dashcam-patrol/backend/internal/entities"
+	"ai-dashcam-patrol/backend/internal/entities/livemap"
 )
 
 // ListRiskSpans คืนรายการ span เรียงตามความเสี่ยง
 // TODO: ดึงจากฐานข้อมูล (PostGIS) เมื่อมีฐานข้อมูล
-func ListRiskSpans(ctx context.Context) ([]entities.RiskSpan, error) {
-	return []entities.RiskSpan{}, nil
+func ListRiskSpans(ctx context.Context) ([]livemap.RiskSpan, error) {
+	return []livemap.RiskSpan{}, nil
 }

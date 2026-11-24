@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"ai-dashcam-patrol/backend/internal/entities"
+	"ai-dashcam-patrol/backend/internal/entities/livemap"
 	"ai-dashcam-patrol/backend/internal/services"
 )
 
@@ -15,7 +15,7 @@ func GetLiveMap(c *gin.Context) {
 	switch c.GetString("roleName") {
 	case "admin", "superadmin":
 	default:
-		liveMap.Tracks = []entities.Track{}
+		liveMap.Tracks = []livemap.Track{}
 	}
 	c.JSON(http.StatusOK, liveMap)
 }

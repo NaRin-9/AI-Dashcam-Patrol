@@ -31,7 +31,7 @@
 2. logic เขียนใน `internal/services/<เรื่อง>.go`
 3. controller เขียนใน `internal/controllers/<เรื่อง>.go`
 4. เพิ่ม 1 บรรทัดใน `internal/routes/routes.go`
-5. รัน `go fmt ./...` และ `go test ./...` ก่อน commit
+5. รัน `go fmt ./...` และ `go build ./...` ก่อน commit
 
 ## Git
 

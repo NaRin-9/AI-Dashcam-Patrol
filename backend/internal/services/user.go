@@ -9,7 +9,8 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"ai-dashcam-patrol/backend/internal/entities"
+	"ai-dashcam-patrol/backend/internal/entities/role"
+	"ai-dashcam-patrol/backend/internal/entities/user"
 )
 
 // UserService จัดการข้อมูลผู้ใช้ทั้งหมด
@@ -23,8 +24,8 @@ func NewUserService(db *sql.DB) *UserService {
 }
 
 // GetByID ดึงข้อมูล user ตาม id พร้อม role name
-func (s *UserService) GetByID(ctx context.Context, id string) (*entities.User, error) {
-	var user entities.User
+func (s *UserService) GetByID(ctx context.Context, id string) (*user.User, error) {
+	var user user.User
 	err := s.db.QueryRowContext(ctx,
 		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
 		 FROM users u JOIN roles r ON u.role_id = r.id
@@ -42,7 +43,7 @@ func (s *UserService) GetByID(ctx context.Context, id string) (*entities.User, e
 }
 
 // GetAll ดึงข้อมูล user ทั้งหมดพร้อม role name (สำหรับ admin)
-func (s *UserService) GetAll(ctx context.Context) ([]entities.User, error) {
+func (s *UserService) GetAll(ctx context.Context) ([]user.User, error) {
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
 		 FROM users u JOIN roles r ON u.role_id = r.id
@@ -53,9 +54,9 @@ func (s *UserService) GetAll(ctx context.Context) ([]entities.User, error) {
 	}
 	defer rows.Close()
 
-	var users []entities.User
+	var users []user.User
 	for rows.Next() {
-		var u entities.User
+		var u user.User
 		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.PasswordHash,
 			&u.RoleID, &u.RoleName, &u.IsActive, &u.CreatedAt, &u.UpdatedAt); err != nil {
 			return nil, fmt.Errorf("cannot scan user: %w", err)
@@ -66,9 +67,9 @@ func (s *UserService) GetAll(ctx context.Context) ([]entities.User, error) {
 }
 
 // UpdateProfile ผู้ใช้อัปเดตโปรไฟล์ตัวเอง (ไม่สามารถเปลี่ยน role ได้)
-func (s *UserService) UpdateProfile(ctx context.Context, userID string, req entities.UpdateUserRequest) (*entities.User, error) {
+func (s *UserService) UpdateProfile(ctx context.Context, userID string, req user.UpdateUserRequest) (*user.User, error) {
 	// ไม่อนุญาตให้ user ทั่วไปเปลี่ยน isActive
-	safeReq := entities.UpdateUserRequest{
+	safeReq := user.UpdateUserRequest{
 		Username: req.Username,
 		Email:    req.Email,
 	}
@@ -76,7 +77,7 @@ func (s *UserService) UpdateProfile(ctx context.Context, userID string, req enti
 }
 
 // ChangePassword ตรวจสอบรหัสเก่าแล้วเปลี่ยนรหัสใหม่
-func (s *UserService) ChangePassword(ctx context.Context, userID string, req entities.ChangePasswordRequest) error {
+func (s *UserService) ChangePassword(ctx context.Context, userID string, req user.ChangePasswordRequest) error {
 	var currentHash string
 	err := s.db.QueryRowContext(ctx,
 		`SELECT password_hash FROM users WHERE id = $1`, userID,
@@ -102,7 +103,7 @@ func (s *UserService) ChangePassword(ctx context.Context, userID string, req ent
 }
 
 // AdminUpdateUser admin อัปเดตข้อมูล user (username, email, isActive)
-func (s *UserService) AdminUpdateUser(ctx context.Context, adminUser entities.User, targetUserID string, req entities.UpdateUserRequest) (*entities.User, error) {
+func (s *UserService) AdminUpdateUser(ctx context.Context, adminUser user.User, targetUserID string, req user.UpdateUserRequest) (*user.User, error) {
 	// ตรวจสอบ target user
 	target, err := s.GetByID(ctx, targetUserID)
 	if err != nil {
@@ -118,7 +119,7 @@ func (s *UserService) AdminUpdateUser(ctx context.Context, adminUser entities.Us
 }
 
 // AdminChangeRole เปลี่ยน role ของ user พร้อมตรวจสอบความปลอดภัย
-func (s *UserService) AdminChangeRole(ctx context.Context, adminUser entities.User, targetUserID string, req entities.AdminChangeRoleRequest) (*entities.User, error) {
+func (s *UserService) AdminChangeRole(ctx context.Context, adminUser user.User, targetUserID string, req user.AdminChangeRoleRequest) (*user.User, error) {
 	target, err := s.GetByID(ctx, targetUserID)
 	if err != nil {
 		return nil, err
@@ -169,7 +170,7 @@ func (s *UserService) AdminChangeRole(ctx context.Context, adminUser entities.Us
 }
 
 // AdminDeleteUser soft delete (set is_active=false) พร้อมตรวจสอบ
-func (s *UserService) AdminDeleteUser(ctx context.Context, adminUser entities.User, targetUserID string) error {
+func (s *UserService) AdminDeleteUser(ctx context.Context, adminUser user.User, targetUserID string) error {
 	target, err := s.GetByID(ctx, targetUserID)
 	if err != nil {
 		return err
@@ -203,16 +204,16 @@ func (s *UserService) AdminDeleteUser(ctx context.Context, adminUser entities.Us
 }
 
 // GetRoles ดึงรายการ role ทั้งหมด
-func (s *UserService) GetRoles(ctx context.Context) ([]entities.Role, error) {
+func (s *UserService) GetRoles(ctx context.Context) ([]role.Role, error) {
 	rows, err := s.db.QueryContext(ctx, `SELECT id, name FROM roles ORDER BY id`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var roles []entities.Role
+	var roles []role.Role
 	for rows.Next() {
-		var r entities.Role
+		var r role.Role
 		if err := rows.Scan(&r.ID, &r.Name); err != nil {
 			return nil, err
 		}
@@ -222,7 +223,7 @@ func (s *UserService) GetRoles(ctx context.Context) ([]entities.Role, error) {
 }
 
 // updateUser internal helper สำหรับอัปเดตข้อมูล user
-func (s *UserService) updateUser(ctx context.Context, userID string, req entities.UpdateUserRequest) (*entities.User, error) {
+func (s *UserService) updateUser(ctx context.Context, userID string, req user.UpdateUserRequest) (*user.User, error) {
 	// สร้าง query แบบ dynamic ตามฟิลด์ที่ส่งมา
 	query := `UPDATE users SET updated_at = NOW()`
 	args := []any{}

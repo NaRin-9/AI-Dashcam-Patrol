@@ -11,6 +11,7 @@ import RegisterPage from '@/pages/Register'
 import ResetPasswordPage from '@/pages/ResetPassword'
 import WelcomePage from '@/pages/Welcome'
 import DashboardPage from '@/pages/Dashboard'
+import MyVideosPage from '@/pages/Dashboard/MyVideosPage'
 import AdminDashboardPage from '@/pages/AdminDashboard'
 import SuperadminDashboardPage from '@/pages/SuperadminDashboard'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
@@ -20,6 +21,7 @@ export const routes = [
   {
     path: '/live-map',
     label: 'Live Map',
+    bare: true,
     element: (
       <ProtectedRoute>
         <LiveMapPage />
@@ -34,9 +36,21 @@ export const routes = [
   {
     path: '/dashboard',
     label: 'Dashboard',
+    bare: true,
     element: (
       <ProtectedRoute>
         <DashboardPage />
+      </ProtectedRoute>
+    ),
+    showInNav: false,
+  },
+  {
+    path: '/my-videos',
+    label: 'วิดีโอของฉัน',
+    bare: true,
+    element: (
+      <ProtectedRoute>
+        <MyVideosPage />
       </ProtectedRoute>
     ),
     showInNav: false,
