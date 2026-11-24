@@ -18,8 +18,8 @@ type Config struct {
 	DBSSLMode  string
 
 	// JWT
-	JWTSecret       string
-	JWTAccessExpiry time.Duration
+	JWTSecret        string
+	JWTAccessExpiry  time.Duration
 	JWTRefreshExpiry time.Duration
 
 	// Server
@@ -29,7 +29,10 @@ type Config struct {
 
 // Load อ่านค่าจาก environment variable แล้วส่งคืน Config
 func Load() (*Config, error) {
-	jwtSecret := getenv("JWT_SECRET", "default_dashcam_patrol_jwt_secret_dev_key_change_in_production")
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if len(jwtSecret) < 32 {
+		return nil, fmt.Errorf("JWT_SECRET must contain at least 32 bytes")
+	}
 
 	accessExpiry, err := time.ParseDuration(getenv("JWT_ACCESS_EXPIRY", "15m"))
 	if err != nil {

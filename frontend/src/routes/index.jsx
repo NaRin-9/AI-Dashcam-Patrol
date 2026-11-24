@@ -11,23 +11,46 @@ import RegisterPage from '@/pages/Register'
 import ResetPasswordPage from '@/pages/ResetPassword'
 import WelcomePage from '@/pages/Welcome'
 import DashboardPage from '@/pages/Dashboard'
+import MyVideosPage from '@/pages/Dashboard/MyVideosPage'
 import AdminDashboardPage from '@/pages/AdminDashboard'
 import SuperadminDashboardPage from '@/pages/SuperadminDashboard'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 export const routes = [
   { path: '/', label: 'Home', element: <HomePage />, phoneElement: <WelcomePage />, showInNav: true },
-  { path: '/live-map', label: 'Live Map', element: <LiveMapPage />, showInNav: true },
+  {
+    path: '/live-map',
+    label: 'Live Map',
+    bare: true,
+    element: (
+      <ProtectedRoute>
+        <LiveMapPage />
+      </ProtectedRoute>
+    ),
+    showInNav: true,
+  },
   { path: '/risk-reports', label: 'Risk Reports', element: <RiskReportsPage />, showInNav: true },
   { path: '/how-it-works', label: 'How it Works', element: <HowItWorksPage />, showInNav: true },
-  
+
   // Dashboard routes พร้อม Role-based route protection
   {
     path: '/dashboard',
     label: 'Dashboard',
+    bare: true,
     element: (
       <ProtectedRoute>
         <DashboardPage />
+      </ProtectedRoute>
+    ),
+    showInNav: false,
+  },
+  {
+    path: '/my-videos',
+    label: 'วิดีโอของฉัน',
+    bare: true,
+    element: (
+      <ProtectedRoute>
+        <MyVideosPage />
       </ProtectedRoute>
     ),
     showInNav: false,

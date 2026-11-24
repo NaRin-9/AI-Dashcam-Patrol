@@ -1,10 +1,10 @@
 # Backend (Go)
 
-API ของ AI Dashcam Patrol เขียนด้วย Go ใช้แค่ไลบรารีมาตรฐาน (`net/http`) ยังไม่มีแพ็กเกจภายนอก
+API ของ AI Dashcam Patrol ใช้ Go, Gin และ PostgreSQL สำหรับระบบล็อกอิน
 
 ## รัน
 
-ต้องมี Go 1.22 ขึ้นไป
+ต้องมี Go 1.26 ขึ้นไป และตั้งค่าฐานข้อมูลก่อน
 
 ```bash
 cd backend
@@ -14,7 +14,17 @@ go run ./cmd/server
 เซิร์ฟเวอร์เปิดที่ http://localhost:8000 ตรวจได้ที่ http://localhost:8000/api/health
 frontend (`npm run dev`) ส่งคำขอ `/api/...` มาที่พอร์ตนี้ให้อัตโนมัติ
 
-คำสั่งอื่น: `go test ./...` รันเทสต์, `go fmt ./...` จัดรูปแบบโค้ด, `go build -o bin/server ./cmd/server` สร้างไฟล์โปรแกรม
+ตั้ง `FRONTEND_DIR` ไปยังโฟลเดอร์ `frontend/dist` ที่ build แล้วเพื่อเสิร์ฟเว็บจาก Go ด้วย ดูตัวอย่างการรันใน [README หลัก](../README.md#รันเว็บที่-build-แล้ว)
+
+## ตั้งค่าฐานข้อมูลและล็อกอิน
+
+1. เตรียม PostgreSQL จาก `docker compose up -d postgres` ที่รากโปรเจกต์ หรือใช้ PostgreSQL ที่มีอยู่
+2. คัดลอก `backend/.env.example` เป็น `backend/.env` แล้วตั้ง `DB_*` ให้ตรงกับฐานข้อมูล รวมถึง `JWT_SECRET` ที่สุ่มขึ้นมาอย่างน้อย 32 ไบต์ Go จะสร้างตารางสำหรับระบบล็อกอินตอนเริ่มรัน
+3. หากต้องการสร้าง Superadmin คนแรก ให้ตั้ง `SUPERADMIN_USERNAME`, `SUPERADMIN_EMAIL` และ `SUPERADMIN_PASSWORD` ก่อนเปิด Go เมื่อสร้างบัญชีแล้วสามารถเอาค่าทั้งสามออกจาก environment ได้
+
+ตอนทดสอบในเครื่องเดียวสามารถตั้ง `HOST=127.0.0.1` ให้ Go รับเฉพาะการเชื่อมต่อในเครื่อง
+
+ใช้ `go fmt ./...` เพื่อจัดรูปแบบโค้ด และ `go build -o bin/server ./cmd/server` เพื่อสร้างไฟล์โปรแกรม
 
 ## โครงสร้าง
 
@@ -34,7 +44,7 @@ backend/
 │  │  └─ riskreports.go
 │  └─ entities/              รูปแบบข้อมูลของระบบ
 │     └─ entities.go         RiskSpan, Track, LiveMap
-├─ .env.example              PORT, ALLOWED_ORIGIN
+├─ .env.example              PORT, ALLOWED_ORIGIN, FRONTEND_DIR
 └─ go.mod
 ```
 
@@ -68,7 +78,7 @@ frontend → routes → controller → service → (ฐานข้อมูล)
 |---|---|---|---|
 | GET | `/api/health` | – | ใช้ได้ |
 | GET | `/api/risk-reports` | RiskReports | คืนรายการว่าง รอฐานข้อมูล |
-| GET | `/api/live-map` | LiveMap | คืนข้อมูลว่าง รอฐานข้อมูล |
+| GET | `/api/live-map` | LiveMap | ต้องล็อกอิน ผู้ใช้ทั่วไปเห็นหมุด ส่วน Admin และ Superadmin เห็นเส้นทางรถด้วย |
 
 ## เพิ่ม endpoint ใหม่
 

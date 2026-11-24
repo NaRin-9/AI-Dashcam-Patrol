@@ -15,7 +15,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"ai-dashcam-patrol/backend/internal/config"
-	"ai-dashcam-patrol/backend/internal/entities"
+	"ai-dashcam-patrol/backend/internal/entities/auth"
+	"ai-dashcam-patrol/backend/internal/entities/refreshtoken"
+	"ai-dashcam-patrol/backend/internal/entities/user"
 )
 
 // AuthService จัดการ authentication ทั้งหมด
@@ -30,13 +32,13 @@ func NewAuthService(db *sql.DB, cfg *config.Config) *AuthService {
 }
 
 // Register ลงทะเบียนผู้ใช้ใหม่ ด้วย role เริ่มต้นเป็น user (role_id=1)
-func (s *AuthService) Register(ctx context.Context, req entities.RegisterRequest) (*entities.User, error) {
+func (s *AuthService) Register(ctx context.Context, req auth.RegisterRequest) (*user.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fmt.Errorf("cannot hash password: %w", err)
 	}
 
-	var user entities.User
+	var user user.User
 	err = s.db.QueryRowContext(ctx,
 		`INSERT INTO users (username, email, password_hash, role_id)
 		 VALUES ($1, $2, $3, 1)
@@ -52,8 +54,8 @@ func (s *AuthService) Register(ctx context.Context, req entities.RegisterRequest
 }
 
 // Login ตรวจสอบ credentials แล้วสร้าง tokens
-func (s *AuthService) Login(ctx context.Context, req entities.LoginRequest) (*entities.AuthResponse, string, error) {
-	var user entities.User
+func (s *AuthService) Login(ctx context.Context, req auth.LoginRequest) (*auth.AuthResponse, string, error) {
+	var user user.User
 	err := s.db.QueryRowContext(ctx,
 		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
 		 FROM users u JOIN roles r ON u.role_id = r.id
@@ -93,17 +95,17 @@ func (s *AuthService) Login(ctx context.Context, req entities.LoginRequest) (*en
 		return nil, "", fmt.Errorf("cannot store refresh token: %w", err)
 	}
 
-	return &entities.AuthResponse{
+	return &auth.AuthResponse{
 		User:        user,
 		AccessToken: accessToken,
 	}, refreshToken, nil
 }
 
 // RefreshToken ตรวจสอบ refresh token แล้วสร้าง pair ใหม่ (token rotation)
-func (s *AuthService) RefreshToken(ctx context.Context, rawToken string) (*entities.AuthResponse, string, error) {
+func (s *AuthService) RefreshToken(ctx context.Context, rawToken string) (*auth.AuthResponse, string, error) {
 	tokenHash := s.HashToken(rawToken)
 
-	var rt entities.RefreshToken
+	var rt refreshtoken.RefreshToken
 	err := s.db.QueryRowContext(ctx,
 		`SELECT id, user_id, expires_at FROM refresh_tokens WHERE token_hash = $1`,
 		tokenHash,
@@ -125,7 +127,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, rawToken string) (*entit
 	_, _ = s.db.ExecContext(ctx, `DELETE FROM refresh_tokens WHERE id = $1`, rt.ID)
 
 	// ดึงข้อมูล user
-	var user entities.User
+	var user user.User
 	err = s.db.QueryRowContext(ctx,
 		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
 		 FROM users u JOIN roles r ON u.role_id = r.id
@@ -158,7 +160,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, rawToken string) (*entit
 		return nil, "", fmt.Errorf("cannot store new refresh token: %w", err)
 	}
 
-	return &entities.AuthResponse{
+	return &auth.AuthResponse{
 		User:        user,
 		AccessToken: accessToken,
 	}, newRefreshToken, nil
@@ -178,8 +180,8 @@ func (s *AuthService) LogoutAll(ctx context.Context, userID string) error {
 }
 
 // GenerateAccessToken สร้าง JWT access token
-func (s *AuthService) GenerateAccessToken(user entities.User) (string, error) {
-	claims := entities.TokenClaims{
+func (s *AuthService) GenerateAccessToken(user user.User) (string, error) {
+	claims := auth.TokenClaims{
 		UserID:   user.ID,
 		Username: user.Username,
 		RoleID:   user.RoleID,

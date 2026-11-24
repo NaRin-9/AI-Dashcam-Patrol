@@ -18,7 +18,7 @@ AI-Dashcam-Patrol/
 │  │  │  └─ App.jsx                เลือกหน้าที่จะแสดงตาม URL
 │  │  ├─ routes/
 │  │  │  ├─ index.jsx              รายการหน้าทั้งหมดและเมนู (เพิ่มหน้าใหม่ที่นี่)
-│  │  │  └─ router.jsx             ตัวเปลี่ยนหน้าแบบ #/path และ <Link>
+│  │  │  └─ router.jsx             ตัวเปลี่ยนหน้าแบบ /path และ <Link>
 │  │  ├─ pages/                    1 โฟลเดอร์ = 1 หน้า
 │  │  │  ├─ Home/                  HomePage.jsx, components/Hero.jsx
 │  │  │  ├─ LiveMap/               แผนที่เส้นทางรถและจุดเสี่ยง
@@ -59,6 +59,7 @@ AI-Dashcam-Patrol/
 
 ## เริ่มต้นใช้งาน
 
+ต้องมี Node.js และ Go 1.26 ขึ้นไป เตรียม PostgreSQL และตั้งค่า `backend/.env` ตาม [วิธีตั้งค่าระบบล็อกอิน](backend/README.md#ตั้งค่าฐานข้อมูลและล็อกอิน) ก่อนเปิด 2 terminal
 
 ```bash
 # terminal 1: backend → http://localhost:8000
@@ -73,13 +74,27 @@ npm run dev
 
 frontend ส่งคำขอ `/api/...` ไปที่ backend ให้อัตโนมัติ ตรวจว่า backend ทำงานที่ http://localhost:8000/api/health
 
+## รันเว็บที่ build แล้ว
+
+รัน `npm run build` ใน `frontend/` แล้วตั้ง environment variable `FRONTEND_DIR` ให้ชี้ไปที่ `frontend/dist` ก่อนเปิด Go server ตัวอย่างนี้ใช้ PowerShell จากรากโปรเจกต์
+
+```powershell
+Set-Location frontend
+npm run build
+Set-Location ../backend
+$env:FRONTEND_DIR = '../frontend/dist'
+go run ./cmd/server
+```
+
+Go จะเสิร์ฟหน้าเว็บและ `/api/...` จาก origin เดียวกัน ลองเปิดหรือรีเฟรช `http://localhost:8000/live-map` ได้เลย หากนำขึ้นโฮสต์ ให้ตั้ง `FRONTEND_DIR` เป็นพาธของโฟลเดอร์ build บนเครื่องนั้น
+
 ## API ตอนนี้
 
 | Method | Path | ใช้กับหน้า |
 |---|---|---|
 | GET | `/api/health` | – |
 | GET | `/api/risk-reports` | RiskReports (ยังคืนข้อมูลว่าง) |
-| GET | `/api/live-map` | LiveMap (ยังคืนข้อมูลว่าง) |
+| GET | `/api/live-map` | LiveMap หลังล็อกอิน (คืนข้อมูลจำลอง และส่งเส้นทางรถเฉพาะ Admin/Superadmin) |
 
 รายละเอียดเพิ่มเติม: [frontend/README.md](frontend/README.md), [backend/README.md](backend/README.md)
 

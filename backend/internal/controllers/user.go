@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"ai-dashcam-patrol/backend/internal/entities"
+	"ai-dashcam-patrol/backend/internal/entities/user"
 	"ai-dashcam-patrol/backend/internal/middleware"
 	"ai-dashcam-patrol/backend/internal/services"
 )
@@ -36,7 +36,7 @@ func (ctrl *UserController) GetProfile(c *gin.Context) {
 func (ctrl *UserController) UpdateProfile(c *gin.Context) {
 	currentUser := middleware.GetCurrentUser(c)
 
-	var req entities.UpdateUserRequest
+	var req user.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -54,7 +54,7 @@ func (ctrl *UserController) UpdateProfile(c *gin.Context) {
 func (ctrl *UserController) ChangePassword(c *gin.Context) {
 	currentUser := middleware.GetCurrentUser(c)
 
-	var req entities.ChangePasswordRequest
+	var req user.ChangePasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -93,7 +93,7 @@ func (ctrl *UserController) AdminUpdateUser(c *gin.Context) {
 	currentUser := middleware.GetCurrentUser(c)
 	targetID := c.Param("id")
 
-	var req entities.UpdateUserRequest
+	var req user.UpdateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -112,7 +112,7 @@ func (ctrl *UserController) AdminChangeRole(c *gin.Context) {
 	currentUser := middleware.GetCurrentUser(c)
 	targetID := c.Param("id")
 
-	var req entities.AdminChangeRoleRequest
+	var req user.AdminChangeRoleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

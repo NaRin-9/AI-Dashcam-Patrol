@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import AuthShell from '@/components/ui/AuthShell'
 import TextField, { PasswordField } from '@/components/ui/TextField'
-import { Link } from '@/routes/router'
+import { Link, useNavigate } from '@/routes/router'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function RegisterPage() {
+  const navigate = useNavigate()
   const { register } = useAuth()
   const [values, setValues] = useState({ username: '', email: '', password: '', confirmPassword: '' })
   const [errors, setErrors] = useState({})
@@ -40,7 +41,7 @@ export default function RegisterPage() {
       })
 
       // ลงทะเบียนแล้วพาไป dashboard
-      window.location.hash = '#/dashboard'
+      navigate('/dashboard', { replace: true })
     } catch (err) {
       setApiError(err.message || 'ลงทะเบียนไม่สำเร็จ')
     } finally {

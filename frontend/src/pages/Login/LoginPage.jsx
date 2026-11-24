@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
-import LoadingOverlay from '@/components/ui/LoadingOverlay'
-import { Link } from '@/routes/router'
+import { useState } from 'react'
+import AuthShell from '@/components/ui/AuthShell'
+import TextField, { PasswordField } from '@/components/ui/TextField'
+import { Link, useNavigate } from '@/routes/router'
 import { useAuth } from '@/contexts/AuthContext'
 import logo from '@/assets/pea-logo.png'
 import phone from '@/assets/phone.svg'
 
 export default function LoginPage() {
-  const { login, isAuthenticated, user } = useAuth()
+  const navigate = useNavigate()
+  const { login } = useAuth()
   const [values, setValues] = useState({ username: '', password: '' })
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -63,11 +65,11 @@ export default function LoginPage() {
 
       const role = data?.user?.role
       if (role === 'superadmin') {
-        window.location.hash = '#/superadmin'
+        navigate('/superadmin', { replace: true })
       } else if (role === 'admin') {
-        window.location.hash = '#/admin'
+        navigate('/admin', { replace: true })
       } else {
-        window.location.hash = '#/dashboard'
+        navigate('/dashboard', { replace: true })
       }
     } catch (err) {
       setApiError(err.message || (lang === 'TH' ? 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง' : 'Invalid credentials'))

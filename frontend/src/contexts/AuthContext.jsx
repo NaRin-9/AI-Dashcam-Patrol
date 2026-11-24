@@ -1,29 +1,36 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import { useNavigate } from '@/routes/router'
 import { authApi, setAccessToken, clearAccessToken } from '@/services/api'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
+  const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true) // true ขณะตรวจสอบ auth ตอน mount
+  const refreshRequest = useRef(null)
 
   // ลอง restore session ตอน mount (ผ่าน refresh token cookie)
   useEffect(() => {
-    restoreSession()
-  }, [])
-
-  async function restoreSession() {
-    try {
-      const data = await authApi.refresh()
+    let active = true
+    // ใช้คำขอเดียวกันเมื่อ StrictMode เรียก effect ซ้ำ เพราะ refresh token เปลี่ยนหลังใช้งาน
+    refreshRequest.current ??= authApi.refresh()
+    refreshRequest.current.then((data) => {
+      if (!active) return
       setAccessToken(data.accessToken)
       setUser(data.user)
-    } catch {
+    }).catch(() => {
+      if (!active) return
       clearAccessToken()
       setUser(null)
-    } finally {
-      setLoading(false)
+    }).finally(() => {
+      if (active) setLoading(false)
+    })
+
+    return () => {
+      active = false
     }
-  }
+  }, [])
 
   const login = useCallback(async (credentials) => {
     const data = await authApi.login(credentials)
@@ -47,8 +54,8 @@ export function AuthProvider({ children }) {
     }
     clearAccessToken()
     setUser(null)
-    window.location.hash = '#/login'
-  }, [])
+    navigate('/login', { replace: true })
+  }, [navigate])
 
   const logoutAll = useCallback(async () => {
     try {
@@ -58,8 +65,8 @@ export function AuthProvider({ children }) {
     }
     clearAccessToken()
     setUser(null)
-    window.location.hash = '#/login'
-  }, [])
+    navigate('/login', { replace: true })
+  }, [navigate])
 
   // ตรวจสอบ role
   const hasRole = useCallback((role) => {

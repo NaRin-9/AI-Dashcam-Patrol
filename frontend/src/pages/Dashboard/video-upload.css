@@ -1,0 +1,100 @@
+.video-upload-trigger, .video-upload-submit {
+  border: 0;
+  border-radius: 8px;
+  background: var(--purple);
+  color: white;
+}
+
+.patrol-dashboard .video-upload-trigger {
+  padding: 8px 12px;
+  font-size: .9rem;
+}
+
+.video-upload-trigger span { font-size: 1.1rem; }
+
+.video-upload {
+  width: min(32rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 1px solid var(--dash-line);
+  border-radius: 18px;
+  background: white;
+  color: #302933;
+  box-shadow: 0 12px 40px #20031c33;
+}
+
+.video-upload::backdrop {
+  background: #21111d59;
+  backdrop-filter: blur(2px);
+}
+
+.video-upload form { display: grid; gap: 12px; padding: 20px; }
+.video-upload-heading, .video-upload-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.video-upload-heading h2 { margin: 0; font-size: 1.25rem; }
+.patrol-dashboard .video-upload-close {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  color: var(--purple-dark);
+  background: #f5edf4;
+  font-size: 1.25rem;
+}
+.video-upload-drop {
+  display: grid;
+  min-height: 150px;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 1px dashed #9a8898;
+  border-radius: 12px;
+  color: var(--dash-muted);
+  text-align: center;
+  cursor: pointer;
+}
+.video-upload-drop strong { color: var(--purple); text-decoration: underline; }
+.video-upload-drop:focus-within, .video-upload-drop.is-dragging {
+  outline: 2px solid var(--purple);
+  background: #faf4fa;
+}
+.video-upload-hint, .video-upload-error { margin: 0; font-size: .875rem; overflow-wrap: anywhere; }
+.video-upload-hint { color: var(--dash-muted); }
+.video-upload-error { color: #a61b29; }
+.video-upload-success { color: #176748; }
+.video-upload-items { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.video-upload-items li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 5px 8px;
+  padding: 8px;
+  border: 1px solid var(--dash-line);
+  border-radius: 8px;
+}
+.video-upload-file { display: grid; gap: 3px; font-size: .9rem; overflow-wrap: anywhere; }
+.video-upload-file small { color: var(--dash-muted); }
+.video-upload-progress, .video-upload-items .video-upload-error { grid-column: 1 / -1; }
+.video-upload-progress progress { flex: 1; accent-color: var(--purple); }
+.video-upload-submit { min-height: 42px; padding: 8px 16px; }
+.video-upload-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.video-upload-actions a { color: var(--purple); text-decoration: underline; }
+.video-upload button:disabled { opacity: .5; cursor: default; }
+
+@media (max-width: 760px) {
+  .video-upload {
+    inset: auto 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: calc(100dvh - 1rem);
+    margin: 0;
+    border-radius: 18px 18px 0 0;
+  }
+  .video-upload form { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  .video-upload-items li { grid-template-columns: minmax(0, 1fr) minmax(0, auto); }
+}

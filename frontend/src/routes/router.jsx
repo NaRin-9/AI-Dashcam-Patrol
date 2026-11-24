@@ -1,30 +1,19 @@
-// Router ขนาดเล็กแบบ hash (#/live-map) ไม่ต้องติดตั้งแพ็กเกจเพิ่ม
-// ใช้ได้ทั้งตอน `npm run dev` และตอนเปิดไฟล์ build ตรงๆ
-// ถ้าภายหลังติดตั้ง react-router-dom ได้ ให้เปลี่ยนเฉพาะไฟล์นี้กับ app/App.jsx
-import { useEffect, useState } from 'react'
+// ตัวห่อ react-router-dom ไว้จุดเดียว หน้าอื่นๆ import จากไฟล์นี้ (`@/routes/router`)
+import { useEffect } from 'react'
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 
-function currentPath() {
-  const hash = window.location.hash.replace(/^#/, '')
-  return hash.startsWith('/') ? hash : '/'
-}
+export { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate }
 
+// path ปัจจุบัน เช่น '/login'
 export function usePath() {
-  const [path, setPath] = useState(currentPath)
-  useEffect(() => {
-    const onChange = () => {
-      setPath(currentPath())
-      window.scrollTo(0, 0)
-    }
-    window.addEventListener('hashchange', onChange)
-    return () => window.removeEventListener('hashchange', onChange)
-  }, [])
-  return path
+  return useLocation().pathname
 }
 
-export function Link({ to, className, children, ...rest }) {
-  return (
-    <a href={`#${to}`} className={className} {...rest}>
-      {children}
-    </a>
-  )
+// เลื่อนกลับบนสุดทุกครั้งที่เปลี่ยนหน้า
+export function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
 }

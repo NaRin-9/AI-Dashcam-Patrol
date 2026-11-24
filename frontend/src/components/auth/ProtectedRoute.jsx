@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext'
+import { Link, Navigate } from '@/routes/router'
 
 // แสดง children เฉพาะเมื่อ user ล็อกอินแล้วและมี role ที่กำหนด
 // ถ้าไม่ระบุ roles จะตรวจแค่ว่าล็อกอินแล้วหรือยัง
@@ -8,8 +9,7 @@ export default function ProtectedRoute({ roles, children }) {
   if (loading) return <LoadingSpinner />
 
   if (!isAuthenticated) {
-    window.location.hash = '#/login'
-    return null
+    return <Navigate to="/login" replace />
   }
 
   if (roles && roles.length > 0 && !roles.includes(user.role)) {
@@ -56,8 +56,8 @@ function AccessDenied() {
       <p style={{ opacity: 0.85, marginBottom: 24 }}>
         คุณไม่มีสิทธิ์เข้าถึงหน้านี้
       </p>
-      <a
-        href="#/dashboard"
+      <Link
+        to="/dashboard"
         style={{
           padding: '10px 24px',
           background: 'var(--gold)',
@@ -68,7 +68,7 @@ function AccessDenied() {
         }}
       >
         กลับไปหน้า Dashboard
-      </a>
+      </Link>
     </div>
   )
 }
