@@ -1,286 +1,1422 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { apiGet, apiPut, apiDelete } from '@/services/api'
-
-const card = {
-  background: 'rgba(255,255,255,0.08)',
-  borderRadius: 16,
-  padding: '28px 32px',
-  backdropFilter: 'blur(8px)',
-  marginBottom: 20,
-}
-
-const roleBadge = (role) => ({
-  display: 'inline-block',
-  padding: '3px 12px',
-  borderRadius: 20,
-  fontSize: '0.8rem',
-  fontWeight: 600,
-  background: role === 'superadmin' ? 'var(--purple-dark)' : role === 'admin' ? '#c60da0' : 'var(--gold)',
-  color: '#fff',
-})
-
-const th = {
-  textAlign: 'left',
-  padding: '10px 14px',
-  fontSize: '0.85rem',
-  fontWeight: 600,
-  opacity: 0.7,
-  borderBottom: '1px solid rgba(255,255,255,0.15)',
-}
-
-const td = {
-  padding: '10px 14px',
-  fontSize: '0.9rem',
-  borderBottom: '1px solid rgba(255,255,255,0.08)',
-}
+import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api'
+import SurveyMap, { useSurvey } from '@/pages/LiveMap/SurveyMap'
+import logo from '@/assets/pea-logo.png'
+import './superadmin-dashboard.css'
 
 export default function SuperadminDashboardPage() {
-  const { user: currentUser } = useAuth()
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [updating, setUpdating] = useState(null)
+  const { user: currentUser, logout } = useAuth()
 
+  // Layout states
+  const [sidebarExpanded, setSidebarExpanded] = useState(true)
+  const [currentView, setCurrentView] = useState('dashboard') // 'dashboard' | 'users' | 'departments'
+
+  // Time filter state: 'today' | 'week' | 'month' | 'last_month'
+  const [timeFilter, setTimeFilter] = useState('month')
+
+  // Alert category filter: 'all' | 'pending' | 'processing' | 'done'
+  const [alertFilter, setAlertFilter] = useState('pending')
+  const [alertSearch, setAlertSearch] = useState('')
+
+  // Map data & selection
+  const { data: mapData } = useSurvey()
+  const [mapSelection, setMapSelection] = useState(null)
+
+  // Users management state
+  const [users, setUsers] = useState([])
+  const [loadingUsers, setLoadingUsers] = useState(false)
+  const [userError, setUserError] = useState(null)
+  const [userSearch, setUserSearch] = useState('')
+  const [userRoleFilter, setUserRoleFilter] = useState('all')
+
+  // Departments state
+  const [departments, setDepartments] = useState([])
+  const [loadingDepts, setLoadingDepts] = useState(false)
+  const [deptError, setDeptError] = useState(null)
+
+  // User Modals state
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [modalLoading, setModalLoading] = useState(false)
+  const [modalError, setModalError] = useState(null)
+
+  // Department Modals state
+  const [showAddDeptModal, setShowAddDeptModal] = useState(false)
+  const [showEditDeptModal, setShowEditDeptModal] = useState(false)
+  const [showDeleteDeptModal, setShowDeleteDeptModal] = useState(false)
+  const [selectedDept, setSelectedDept] = useState(null)
+  const [deptFormData, setDeptFormData] = useState({ name: '', description: '' })
+
+  // User Form state
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    firstName: '',
+    lastName: '',
+    departmentId: '',
+    password: '',
+    roleId: 1, // 1: user, 2: admin, 3: superadmin
+    isActive: true,
+  })
+
+  // Mock / dynamic incidents alerts data
+  const [incidents] = useState([
+    {
+      id: 'CASE-2026-081',
+      poleCode: 'PEA-CNX-014',
+      riskLevel: 'touching',
+      status: 'pending',
+      desc: 'กิ่งไม้สัมผัสแนวสายไฟแรงสูง เสี่ยงไฟดับลัดวงจร',
+      location: [18.7883, 98.9853],
+      timeAgo: '15 นาทีที่แล้ว',
+      date: '2026-11-24',
+    },
+    {
+      id: 'CASE-2026-079',
+      poleCode: 'PEA-BKK-092',
+      riskLevel: 'near',
+      status: 'pending',
+      desc: 'ต้นไม้ใกล้แนวสายไฟระยะต่ำกว่า 1.5 เมตร',
+      location: [13.7563, 100.5018],
+      timeAgo: '42 นาทีที่แล้ว',
+      date: '2026-11-24',
+    },
+    {
+      id: 'CASE-2026-072',
+      poleCode: 'PEA-NMA-055',
+      riskLevel: 'touching',
+      status: 'processing',
+      desc: 'ทีมช่างกำลังเข้าตัดแต่งกิ่งไม้บริเวณเสา 55',
+      location: [14.9799, 102.0978],
+      timeAgo: '2 ชั่วโมงที่แล้ว',
+      date: '2026-11-24',
+    },
+    {
+      id: 'CASE-2026-068',
+      poleCode: 'PEA-HYI-021',
+      riskLevel: 'near',
+      status: 'processing',
+      desc: 'ส่งหนังสือแจ้งเจ้าของพื้นที่ตัดแต่งต้นไม้',
+      location: [7.0086, 100.4767],
+      timeAgo: '5 ชั่วโมงที่แล้ว',
+      date: '2026-11-23',
+    },
+    {
+      id: 'CASE-2026-054',
+      poleCode: 'PEA-BKK-019',
+      riskLevel: 'resolved',
+      status: 'done',
+      desc: 'ตัดแต่งกิ่งไม้และตรวจสอบแนวสายไฟเรียบร้อยแล้ว',
+      location: [13.7463, 100.5318],
+      timeAgo: '1 วันที่แล้ว',
+      date: '2026-11-22',
+    },
+    {
+      id: 'CASE-2026-049',
+      poleCode: 'PEA-CBI-088',
+      riskLevel: 'resolved',
+      status: 'done',
+      desc: 'ซ่อมแซมและเคลียร์กิ่งไม้เสร็จสิ้น ปลอดภัย',
+      location: [13.3611, 100.9847],
+      timeAgo: '2 วันที่แล้ว',
+      date: '2026-11-21',
+    },
+  ])
+
+  // Fetch Users
   const fetchUsers = useCallback(async () => {
     try {
-      setLoading(true)
-      setError(null)
+      setLoadingUsers(true)
+      setUserError(null)
       const data = await apiGet('/admin/users')
       setUsers(data.users || data || [])
     } catch (err) {
-      setError(err.message)
+      setUserError(err.message)
     } finally {
-      setLoading(false)
+      setLoadingUsers(false)
     }
   }, [])
 
-  useEffect(() => { fetchUsers() }, [fetchUsers])
-
-  async function handleRoleChange(userId, newRoleId) {
+  // Fetch Departments
+  const fetchDepartments = useCallback(async () => {
     try {
-      setUpdating(userId)
-      await apiPut(`/admin/users/${userId}/role`, { roleId: newRoleId })
-      await fetchUsers()
+      setLoadingDepts(true)
+      setDeptError(null)
+      const data = await apiGet('/departments')
+      setDepartments(data.departments || [])
     } catch (err) {
-      alert('เปลี่ยน role ไม่สำเร็จ: ' + err.message)
+      setDeptError(err.message)
     } finally {
-      setUpdating(null)
+      setLoadingDepts(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchUsers()
+    fetchDepartments()
+  }, [fetchUsers, fetchDepartments])
+
+  // Add User Handler
+  async function handleAddUser(e) {
+    e.preventDefault()
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      await apiPost('/admin/users', {
+        username: formData.username,
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        departmentId: formData.departmentId ? Number(formData.departmentId) : 0,
+        password: formData.password,
+        roleId: Number(formData.roleId),
+      })
+      setShowAddModal(false)
+      setFormData({
+        username: '',
+        email: '',
+        firstName: '',
+        lastName: '',
+        departmentId: '',
+        password: '',
+        roleId: 1,
+        isActive: true,
+      })
+      await fetchUsers()
+      await fetchDepartments()
+    } catch (err) {
+      setModalError(err.message || 'ไม่สามารถเพิ่มผู้ใช้งานได้')
+    } finally {
+      setModalLoading(false)
     }
   }
 
-  async function handleToggleActive(userId, isActive) {
+  // Edit User Handler
+  async function handleEditUser(e) {
+    e.preventDefault()
+    if (!selectedUser) return
+    setModalLoading(true)
+    setModalError(null)
     try {
-      setUpdating(userId)
-      await apiPut(`/admin/users/${userId}`, { isActive: !isActive })
+      // 1. Update basic info, names, department & active status
+      await apiPut(`/admin/users/${selectedUser.id}`, {
+        username: formData.username,
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        departmentId: formData.departmentId ? Number(formData.departmentId) : 0,
+        isActive: formData.isActive,
+      })
+
+      // 2. Update role if changed
+      const originalRoleId = selectedUser.role === 'superadmin' ? 3 : selectedUser.role === 'admin' ? 2 : 1
+      if (Number(formData.roleId) !== originalRoleId) {
+        await apiPut(`/admin/users/${selectedUser.id}/role`, {
+          roleId: Number(formData.roleId),
+        })
+      }
+
+      setShowEditModal(false)
+      setSelectedUser(null)
+      await fetchUsers()
+      await fetchDepartments()
+    } catch (err) {
+      setModalError(err.message || 'ไม่สามารถแก้ไขข้อมูลได้')
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  // Delete User Handler
+  async function handleDeleteUser() {
+    if (!selectedUser) return
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      await apiDelete(`/admin/users/${selectedUser.id}`)
+      setShowDeleteModal(false)
+      setSelectedUser(null)
+      await fetchUsers()
+      await fetchDepartments()
+    } catch (err) {
+      setModalError(err.message || 'ไม่สามารถลบผู้ใช้งานได้')
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  // Direct Role Change
+  async function handleDirectRoleChange(userId, newRoleId) {
+    try {
+      await apiPut(`/admin/users/${userId}/role`, { roleId: Number(newRoleId) })
+      await fetchUsers()
+    } catch (err) {
+      alert('เปลี่ยนบทบาทไม่สำเร็จ: ' + err.message)
+    }
+  }
+
+  // Direct Toggle Active
+  async function handleDirectToggleActive(userId, currentActive) {
+    try {
+      await apiPut(`/admin/users/${userId}`, { isActive: !currentActive })
       await fetchUsers()
     } catch (err) {
       alert('เปลี่ยนสถานะไม่สำเร็จ: ' + err.message)
-    } finally {
-      setUpdating(null)
     }
   }
 
-  async function handleDeleteUser(userId, username) {
-    if (!confirm(`คุณต้องการลบผู้ใช้ "${username}" จริงหรือไม่?`)) return
+  // Direct Department Change
+  async function handleDirectDepartmentChange(userId, newDeptId) {
     try {
-      setUpdating(userId)
-      await apiDelete(`/admin/users/${userId}`)
+      await apiPut(`/admin/users/${userId}`, {
+        departmentId: newDeptId ? Number(newDeptId) : 0,
+      })
+      await fetchUsers()
+      await fetchDepartments()
+    } catch (err) {
+      alert('เปลี่ยนแผนกไม่สำเร็จ: ' + err.message)
+    }
+  }
+
+  // Department Handlers
+  async function handleAddDept(e) {
+    e.preventDefault()
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      await apiPost('/departments', deptFormData)
+      setShowAddDeptModal(false)
+      setDeptFormData({ name: '', description: '' })
+      await fetchDepartments()
+    } catch (err) {
+      setModalError(err.message || 'ไม่สามารถเพิ่มแผนกได้')
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  async function handleEditDept(e) {
+    e.preventDefault()
+    if (!selectedDept) return
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      await apiPut(`/departments/${selectedDept.id}`, deptFormData)
+      setShowEditDeptModal(false)
+      setSelectedDept(null)
+      await fetchDepartments()
       await fetchUsers()
     } catch (err) {
-      alert('ลบผู้ใช้ไม่สำเร็จ: ' + err.message)
+      setModalError(err.message || 'ไม่สามารถแก้ไขแผนกได้')
     } finally {
-      setUpdating(null)
+      setModalLoading(false)
     }
   }
 
-  // สรุปสถิติ
+  async function handleDeleteDept() {
+    if (!selectedDept) return
+    setModalLoading(true)
+    setModalError(null)
+    try {
+      await apiDelete(`/departments/${selectedDept.id}`)
+      setShowDeleteDeptModal(false)
+      setSelectedDept(null)
+      await fetchDepartments()
+      await fetchUsers()
+    } catch (err) {
+      setModalError(err.message || 'ไม่สามารถลบแผนกได้')
+    } finally {
+      setModalLoading(false)
+    }
+  }
+
+  function openEditModal(u) {
+    setSelectedUser(u)
+    setFormData({
+      username: u.username,
+      email: u.email,
+      firstName: u.firstName || '',
+      lastName: u.lastName || '',
+      departmentId: u.departmentId || '',
+      password: '',
+      roleId: u.role === 'superadmin' ? 3 : u.role === 'admin' ? 2 : 1,
+      isActive: u.isActive,
+    })
+    setModalError(null)
+    setShowEditModal(true)
+  }
+
+  function openDeleteModal(u) {
+    setSelectedUser(u)
+    setModalError(null)
+    setShowDeleteModal(true)
+  }
+
+  function openEditDeptModal(d) {
+    setSelectedDept(d)
+    setDeptFormData({ name: d.name, description: d.description || '' })
+    setModalError(null)
+    setShowEditDeptModal(true)
+  }
+
+  function openDeleteDeptModal(d) {
+    setSelectedDept(d)
+    setModalError(null)
+    setShowDeleteDeptModal(true)
+  }
+
+  // Filtered Users
+  const filteredUsers = users.filter((u) => {
+    const term = userSearch.toLowerCase()
+    const matchSearch =
+      u.username.toLowerCase().includes(term) ||
+      u.email.toLowerCase().includes(term) ||
+      (u.firstName && u.firstName.toLowerCase().includes(term)) ||
+      (u.lastName && u.lastName.toLowerCase().includes(term)) ||
+      (u.department && u.department.toLowerCase().includes(term))
+    const matchRole = userRoleFilter === 'all' || u.role === userRoleFilter
+    return matchSearch && matchRole
+  })
+
+  // Filtered Alerts
+  const filteredAlerts = incidents.filter((item) => {
+    const matchStatus = alertFilter === 'all' || item.status === alertFilter
+    const matchSearch =
+      item.id.toLowerCase().includes(alertSearch.toLowerCase()) ||
+      item.poleCode.toLowerCase().includes(alertSearch.toLowerCase()) ||
+      item.desc.toLowerCase().includes(alertSearch.toLowerCase())
+    return matchStatus && matchSearch
+  })
+
+  // Stats
   const stats = {
-    total: users.length,
-    active: users.filter((u) => u.isActive).length,
-    admins: users.filter((u) => u.role === 'admin').length,
-    superadmins: users.filter((u) => u.role === 'superadmin').length,
+    pending: 40,
+    processing: 200,
+    done: 500,
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: 8 }}>
-        🔑 Super Admin Dashboard
-      </h1>
-      <p style={{ opacity: 0.8, marginBottom: 32 }}>
-        การจัดการระบบและผู้ใช้งานทั้งหมด
-      </p>
+    <div className="superadmin-container">
+      {/* ================= SIDEBAR ================= */}
+      <aside className={`superadmin-sidebar ${sidebarExpanded ? 'expanded' : 'collapsed'}`}>
+        {/* Curved Notch Toggle */}
+        <button
+          className="superadmin-toggle-notch"
+          onClick={() => setSidebarExpanded(!sidebarExpanded)}
+          title={sidebarExpanded ? 'ย่อ Side Bar' : 'ขยาย Side Bar'}
+          aria-label={sidebarExpanded ? 'ย่อ Side Bar' : 'ขยาย Side Bar'}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ transform: sidebarExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
+          >
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 24 }}>
-        <StatCard label="ผู้ใช้ทั้งหมด" value={stats.total} color="var(--gold)" />
-        <StatCard label="Active" value={stats.active} color="#1a8a4a" />
-        <StatCard label="Admins" value={stats.admins} color="#c60da0" />
-        <StatCard label="Superadmins" value={stats.superadmins} color="var(--purple-dark)" />
-      </div>
+        {/* Brand Header */}
+        <div className="superadmin-sidebar-header">
+          <img src={logo} alt="PEA Logo" className="superadmin-sidebar-logo" />
+          {sidebarExpanded && (
+            <div className="superadmin-sidebar-title">
+              <strong>PEA PATROL</strong>
+              <span>Super Admin Portal</span>
+            </div>
+          )}
+        </div>
 
-      {/* User Management */}
-      <div style={card}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
-            จัดการผู้ใช้ทั้งหมด
-          </h2>
-          <button onClick={fetchUsers} style={refreshBtn} disabled={loading}>
-            {loading ? '⏳' : '🔄'} Refresh
+        {/* Navigation */}
+        <nav className="superadmin-nav">
+          <button
+            className={`superadmin-nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
+            onClick={() => setCurrentView('dashboard')}
+            title="Dashboard ภาพรวม"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+            </svg>
+            {sidebarExpanded && <span>แดชบอร์ด (Overview)</span>}
+          </button>
+
+          <button
+            className={`superadmin-nav-item ${currentView === 'users' ? 'active' : ''}`}
+            onClick={() => setCurrentView('users')}
+            title="จัดการผู้ใช้งาน"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            {sidebarExpanded && <span>จัดการผู้ใช้ (Users)</span>}
+          </button>
+
+          <button
+            className={`superadmin-nav-item ${currentView === 'departments' ? 'active' : ''}`}
+            onClick={() => setCurrentView('departments')}
+            title="จัดการแผนก"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
+              <line x1="9" y1="22" x2="9" y2="22.01" />
+              <line x1="15" y1="22" x2="15" y2="22.01" />
+              <line x1="9" y1="18" x2="9" y2="18.01" />
+              <line x1="15" y1="18" x2="15" y2="18.01" />
+              <line x1="9" y1="14" x2="9" y2="14.01" />
+              <line x1="15" y1="14" x2="15" y2="14.01" />
+              <line x1="9" y1="10" x2="9" y2="10.01" />
+              <line x1="15" y1="10" x2="15" y2="10.01" />
+              <line x1="9" y1="6" x2="9" y2="6.01" />
+              <line x1="15" y1="6" x2="15" y2="6.01" />
+            </svg>
+            {sidebarExpanded && <span>จัดการแผนก (Departments)</span>}
+          </button>
+
+          <a href="/#/live-map" className="superadmin-nav-item" title="แผนที่สด">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+              <line x1="8" y1="2" x2="8" y2="18" />
+              <line x1="16" y1="6" x2="16" y2="22" />
+            </svg>
+            {sidebarExpanded && <span>แผนที่ตรวจการณ์</span>}
+          </a>
+
+          <a href="/#/risk-reports" className="superadmin-nav-item" title="รายงานความเสี่ยง">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+            </svg>
+            {sidebarExpanded && <span>รายงานความเสี่ยง</span>}
+          </a>
+        </nav>
+
+        {/* Footer */}
+        <div className="superadmin-sidebar-footer">
+          <button
+            onClick={logout}
+            className="superadmin-nav-item"
+            title="ออกจากระบบ"
+            style={{ color: '#fca5a5' }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            {sidebarExpanded && <span>ออกจากระบบ</span>}
           </button>
         </div>
+      </aside>
 
-        {error && (
-          <p style={{ color: '#ffd54a', marginBottom: 16 }}>⚠️ {error}</p>
-        )}
-
-        {loading ? (
-          <p style={{ opacity: 0.7, textAlign: 'center', padding: 32 }}>กำลังโหลด...</p>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={th}>Username</th>
-                  <th style={th}>Email</th>
-                  <th style={th}>Role</th>
-                  <th style={th}>สถานะ</th>
-                  <th style={th}>สมัครเมื่อ</th>
-                  <th style={th}>การดำเนินการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => {
-                  const isCurrentUser = u.id === currentUser?.id
-
-                  return (
-                    <tr key={u.id}>
-                      <td style={td}>
-                        {u.username}
-                        {isCurrentUser && <span style={{ opacity: 0.5, marginLeft: 6, fontSize: '0.8rem' }}>(คุณ)</span>}
-                      </td>
-                      <td style={td}>{u.email}</td>
-                      <td style={td}>
-                        <span style={roleBadge(u.role)}>{u.role}</span>
-                      </td>
-                      <td style={td}>{u.isActive ? '✅' : '❌'}</td>
-                      <td style={td}>
-                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString('th-TH') : '-'}
-                      </td>
-                      <td style={td}>
-                        {!isCurrentUser ? (
-                          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                            <select
-                              value={u.role === 'superadmin' ? 3 : u.role === 'admin' ? 2 : 1}
-                              onChange={(e) => handleRoleChange(u.id, Number(e.target.value))}
-                              disabled={updating === u.id}
-                              style={selectStyle}
-                            >
-                              <option value={1}>user</option>
-                              <option value={2}>admin</option>
-                              <option value={3}>superadmin</option>
-                            </select>
-                            <button
-                              onClick={() => handleToggleActive(u.id, u.isActive)}
-                              disabled={updating === u.id}
-                              style={{
-                                ...smallBtn,
-                                background: u.isActive ? '#b8044e' : '#1a8a4a',
-                              }}
-                            >
-                              {u.isActive ? 'Deactivate' : 'Activate'}
-                            </button>
-                            <button
-                              onClick={() => handleDeleteUser(u.id, u.username)}
-                              disabled={updating === u.id}
-                              style={{ ...smallBtn, background: '#8b0000' }}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        ) : (
-                          <span style={{ opacity: 0.5, fontSize: '0.8rem' }}>—</span>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+      {/* ================= MAIN CONTENT ================= */}
+      <main className="superadmin-main">
+        {/* Top Header */}
+        <header className="superadmin-header">
+          <div className="superadmin-search-bar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={alertSearch}
+              onChange={(e) => setAlertSearch(e.target.value)}
+            />
           </div>
-        )}
-      </div>
 
-      {/* System Info */}
-      <div style={card}>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginTop: 0, marginBottom: 16 }}>
-          ข้อมูลระบบ
-        </h2>
-        <div style={{ display: 'grid', gap: 10 }}>
-          <InfoRow label="Frontend" value="React 19 + Vite 7" />
-          <InfoRow label="Backend" value="Go + Gin" />
-          <InfoRow label="Auth" value="JWT (access + refresh)" />
-          <InfoRow label="Database" value="PostgreSQL" />
+          <div className="superadmin-header-right">
+            <div className="superadmin-user-profile">
+              <div className="superadmin-user-info">
+                <span className="superadmin-user-name">
+                  {currentUser?.firstName ? `${currentUser.firstName} ${currentUser.lastName || ''}` : (currentUser?.username || 'Super Admin')}
+                </span>
+                <span className="superadmin-user-role">Super Admin</span>
+              </div>
+              <div className="superadmin-avatar">
+                {currentUser?.username?.charAt(0).toUpperCase() || 'S'}
+              </div>
+            </div>
+
+            <button className="superadmin-bell-btn" title="การแจ้งเตือน">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+              <span className="superadmin-bell-badge" />
+            </button>
+          </div>
+        </header>
+
+        {/* Body Views */}
+        <div className="superadmin-body">
+          {currentView === 'dashboard' ? (
+            /* ================= VIEW: DASHBOARD ================= */
+            <>
+              {/* Filter Pills on top right */}
+              <div className="superadmin-filter-bar">
+                <div className="superadmin-time-pills">
+                  <button
+                    className={`superadmin-time-pill ${timeFilter === 'today' ? 'active' : ''}`}
+                    onClick={() => setTimeFilter('today')}
+                  >
+                    To day
+                  </button>
+                  <button
+                    className={`superadmin-time-pill ${timeFilter === 'week' ? 'active' : ''}`}
+                    onClick={() => setTimeFilter('week')}
+                  >
+                    This Week
+                  </button>
+                  <button
+                    className={`superadmin-time-pill ${timeFilter === 'month' ? 'active' : ''}`}
+                    onClick={() => setTimeFilter('month')}
+                  >
+                    This Month
+                  </button>
+                  <button
+                    className={`superadmin-time-pill ${timeFilter === 'last_month' ? 'active' : ''}`}
+                    onClick={() => setTimeFilter('last_month')}
+                  >
+                    Last Month
+                  </button>
+                </div>
+              </div>
+
+              {/* 3 Stat Cards */}
+              <div className="superadmin-stats-row">
+                <div className="superadmin-stat-card pending">
+                  <div className="superadmin-stat-content">
+                    <span className="superadmin-stat-label">Pending</span>
+                    <strong className="superadmin-stat-number">{stats.pending}</strong>
+                  </div>
+                </div>
+
+                <div className="superadmin-stat-card processing">
+                  <div className="superadmin-stat-content">
+                    <span className="superadmin-stat-label">Processing</span>
+                    <strong className="superadmin-stat-number">{stats.processing}</strong>
+                  </div>
+                </div>
+
+                <div className="superadmin-stat-card done">
+                  <div className="superadmin-stat-content">
+                    <span className="superadmin-stat-label">Done</span>
+                    <strong className="superadmin-stat-number">{stats.done}</strong>
+                  </div>
+                </div>
+              </div>
+
+              {/* Split Content: Left Map, Right Alerts */}
+              <div className="superadmin-grid">
+                <section className="superadmin-map-panel">
+                  <div className="superadmin-panel-header">
+                    <h2>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                      </svg>
+                      แสดงแผนที่ (Survey Map)
+                    </h2>
+                    <a
+                      href="/#/live-map"
+                      style={{ fontSize: '0.85rem', color: 'var(--sa-purple)', fontWeight: 600, textDecoration: 'none' }}
+                    >
+                      ขยายเต็มจอ ↗
+                    </a>
+                  </div>
+                  <div className="superadmin-map-container">
+                    <SurveyMap data={mapData} selection={mapSelection} />
+                  </div>
+                  <div className="superadmin-map-caption">
+                    <span>📍 พิกัดสำรวจล่าสุดของการไฟฟ้าส่วนภูมิภาค</span>
+                    <span>สีแดง: สัมผัสแนวสายไฟ | สีส้ม: ใกล้แนวสายไฟ</span>
+                  </div>
+                </section>
+
+                <section className="superadmin-alerts-panel">
+                  <div className="superadmin-panel-header">
+                    <h2>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                      </svg>
+                      แจ้งเตือน (Incidents)
+                    </h2>
+                    <div className="superadmin-alerts-tabs">
+                      <button
+                        className={`superadmin-alert-tab tab-pending ${alertFilter === 'pending' ? 'active' : ''}`}
+                        onClick={() => setAlertFilter('pending')}
+                      >
+                        Pending
+                      </button>
+                      <button
+                        className={`superadmin-alert-tab tab-processing ${alertFilter === 'processing' ? 'active' : ''}`}
+                        onClick={() => setAlertFilter('processing')}
+                      >
+                        Processing
+                      </button>
+                      <button
+                        className={`superadmin-alert-tab tab-done ${alertFilter === 'done' ? 'active' : ''}`}
+                        onClick={() => setAlertFilter('done')}
+                      >
+                        Done
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="superadmin-alerts-list">
+                    {filteredAlerts.length > 0 ? (
+                      filteredAlerts.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`superadmin-alert-item ${mapSelection?.id === item.id ? 'selected' : ''}`}
+                          onClick={() => setMapSelection({ id: item.id })}
+                        >
+                          <span className={`superadmin-alert-badge badge-${item.status}`}>
+                            {item.status}
+                          </span>
+                          <div className="superadmin-alert-info">
+                            <div className="superadmin-alert-title">
+                              <strong>{item.id} · {item.poleCode}</strong>
+                              <time>{item.timeAgo}</time>
+                            </div>
+                            <p className="superadmin-alert-desc">{item.desc}</p>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p style={{ textAlign: 'center', color: '#9ca3af', padding: '36px 16px', fontSize: '0.9rem' }}>
+                        ไม่มีรายการแจ้งเตือนในสถานะนี้
+                      </p>
+                    )}
+                  </div>
+                </section>
+              </div>
+            </>
+          ) : currentView === 'departments' ? (
+            /* ================= VIEW: DEPARTMENTS ================= */
+            <section className="superadmin-users-view">
+              <div className="superadmin-users-header">
+                <div>
+                  <h2>🏢 การจัดการแผนก (Department Management)</h2>
+                  <p>เพิ่ม ลบ แก้ไขแผนกต่างๆ ในสังกัดการไฟฟ้าส่วนภูมิภาค เพื่อผูกกับข้อมูลเจ้าหน้าที่</p>
+                </div>
+                <button
+                  className="superadmin-btn-primary"
+                  onClick={() => {
+                    setDeptFormData({ name: '', description: '' })
+                    setModalError(null)
+                    setShowAddDeptModal(true)
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  + เพิ่มแผนกใหม่
+                </button>
+              </div>
+
+              {deptError && (
+                <div style={{ padding: '12px 16px', background: '#fee2e2', color: '#b91c1c', borderRadius: 8, marginBottom: 16 }}>
+                  ⚠️ {deptError}
+                </div>
+              )}
+
+              {loadingDepts ? (
+                <p style={{ textAlign: 'center', padding: 48, color: '#6b7280' }}>กำลังโหลดข้อมูลแผนก...</p>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="superadmin-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: 80 }}>รหัส</th>
+                        <th>ชื่อแผนก (Department Name)</th>
+                        <th>รายละเอียด (Description)</th>
+                        <th style={{ textAlign: 'center', width: 140 }}>จำนวนสมาชิก</th>
+                        <th style={{ textAlign: 'center', width: 180 }}>จัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {departments.map((dept) => (
+                        <tr key={dept.id}>
+                          <td><strong>#{dept.id}</strong></td>
+                          <td>
+                            <strong style={{ color: 'var(--sa-purple)', fontSize: '0.95rem' }}>{dept.name}</strong>
+                          </td>
+                          <td style={{ color: '#4b5563' }}>{dept.description || '-'}</td>
+                          <td style={{ textAlign: 'center' }}>
+                            <span style={{
+                              display: 'inline-block',
+                              padding: '2px 10px',
+                              borderRadius: 12,
+                              background: '#e0e7ff',
+                              color: '#3730a3',
+                              fontSize: '0.8rem',
+                              fontWeight: 700,
+                            }}>
+                              👤 {dept.userCount || 0} คน
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <div style={{ display: 'inline-flex', gap: 8 }}>
+                              <button
+                                onClick={() => openEditDeptModal(dept)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: 6,
+                                  border: '1px solid var(--sa-border)',
+                                  background: '#ffffff',
+                                  color: '#374151',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                ✏️ แก้ไข
+                              </button>
+                              <button
+                                onClick={() => openDeleteDeptModal(dept)}
+                                style={{
+                                  padding: '6px 12px',
+                                  borderRadius: 6,
+                                  border: 'none',
+                                  background: '#fee2e2',
+                                  color: '#b91c1c',
+                                  fontSize: '0.82rem',
+                                  fontWeight: 600,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                🗑️ ลบ
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          ) : (
+            /* ================= VIEW: USERS ================= */
+            <section className="superadmin-users-view">
+              <div className="superadmin-users-header">
+                <div>
+                  <h2>👥 จัดการผู้ใช้งานในระบบ</h2>
+                  <p>แอดมินสามารถเพิ่ม ลบ และแก้ไขสิทธิ์ได้ทั้ง User, Admin, และ Super Admin พร้อมระบุชื่อ-นามสกุล และแผนก</p>
+                </div>
+                <button
+                  className="superadmin-btn-primary"
+                  onClick={() => {
+                    setFormData({
+                      username: '',
+                      email: '',
+                      firstName: '',
+                      lastName: '',
+                      departmentId: '',
+                      password: '',
+                      roleId: 1,
+                      isActive: true,
+                    })
+                    setModalError(null)
+                    setShowAddModal(true)
+                  }}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  + เพิ่มผู้ใช้งานใหม่
+                </button>
+              </div>
+
+              {/* Filters */}
+              <div className="superadmin-table-filters">
+                <div className="superadmin-table-search">
+                  <input
+                    type="text"
+                    placeholder="🔍 ค้นหาตามชื่อ, นามสกุล, อีเมล หรือแผนก..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                  />
+                </div>
+
+                <div className="superadmin-role-filter-pills">
+                  <button
+                    className={`superadmin-role-pill ${userRoleFilter === 'all' ? 'active' : ''}`}
+                    onClick={() => setUserRoleFilter('all')}
+                  >
+                    ทั้งหมด ({users.length})
+                  </button>
+                  <button
+                    className={`superadmin-role-pill ${userRoleFilter === 'user' ? 'active' : ''}`}
+                    onClick={() => setUserRoleFilter('user')}
+                  >
+                    User ({users.filter((u) => u.role === 'user').length})
+                  </button>
+                  <button
+                    className={`superadmin-role-pill ${userRoleFilter === 'admin' ? 'active' : ''}`}
+                    onClick={() => setUserRoleFilter('admin')}
+                  >
+                    Admin ({users.filter((u) => u.role === 'admin').length})
+                  </button>
+                  <button
+                    className={`superadmin-role-pill ${userRoleFilter === 'superadmin' ? 'active' : ''}`}
+                    onClick={() => setUserRoleFilter('superadmin')}
+                  >
+                    Super Admin ({users.filter((u) => u.role === 'superadmin').length})
+                  </button>
+                </div>
+              </div>
+
+              {userError && (
+                <div style={{ padding: '12px 16px', background: '#fee2e2', color: '#b91c1c', borderRadius: 8, marginBottom: 16 }}>
+                  ⚠️ {userError}
+                </div>
+              )}
+
+              {/* Table */}
+              {loadingUsers ? (
+                <p style={{ textAlign: 'center', padding: 48, color: '#6b7280' }}>กำลังโหลดข้อมูลผู้ใช้...</p>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table className="superadmin-table">
+                    <thead>
+                      <tr>
+                        <th>ผู้ใช้งาน (User)</th>
+                        <th>ชื่อ - นามสกุล</th>
+                        <th>แผนก (Department)</th>
+                        <th>อีเมล</th>
+                        <th>บทบาท (Role)</th>
+                        <th>สถานะ</th>
+                        <th style={{ textAlign: 'center' }}>จัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredUsers.map((u) => {
+                        const isSelf = u.id === currentUser?.id
+                        return (
+                          <tr key={u.id}>
+                            <td>
+                              <div className="user-cell">
+                                <div className="user-avatar-sm">
+                                  {u.username.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="user-meta">
+                                  <strong>{u.username} {isSelf && <small style={{ color: 'var(--sa-purple)' }}>(คุณ)</small>}</strong>
+                                  <span>ID: {u.id.slice(0, 8)}...</span>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <strong>
+                                {u.firstName || u.lastName ? `${u.firstName || ''} ${u.lastName || ''}`.trim() : '-'}
+                              </strong>
+                            </td>
+                            <td>
+                              <select
+                                value={u.departmentId || ''}
+                                onChange={(e) => handleDirectDepartmentChange(u.id, e.target.value)}
+                                style={{
+                                  padding: '5px 10px',
+                                  borderRadius: 8,
+                                  border: '1px solid var(--sa-border)',
+                                  fontSize: '0.85rem',
+                                  fontWeight: 600,
+                                  color: u.departmentId ? 'var(--sa-purple)' : '#6b7280',
+                                  background: u.departmentId ? '#fbf3fa' : '#f9fafb',
+                                  cursor: 'pointer',
+                                  maxWidth: 220,
+                                }}
+                              >
+                                <option value="">-- ไม่ระบุแผนก --</option>
+                                {departments.map((d) => (
+                                  <option key={d.id} value={d.id}>
+                                    🏢 {d.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                            <td>{u.email}</td>
+                            <td>
+                              <select
+                                value={u.role === 'superadmin' ? 3 : u.role === 'admin' ? 2 : 1}
+                                onChange={(e) => handleDirectRoleChange(u.id, e.target.value)}
+                                style={{
+                                  padding: '5px 10px',
+                                  borderRadius: 8,
+                                  border: '1px solid var(--sa-border)',
+                                  fontSize: '0.85rem',
+                                  fontWeight: 600,
+                                  color: u.role === 'superadmin' ? '#741270' : u.role === 'admin' ? '#c60da0' : '#4b5563',
+                                  background: u.role === 'superadmin' ? '#fbf3fa' : u.role === 'admin' ? '#fdf2f8' : '#f3f4f6',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                <option value={1}>User (ผู้ใช้ทั่วไป)</option>
+                                <option value={2}>Admin (ผู้ดูแล)</option>
+                                <option value={3}>Super Admin (ผู้ดูแลสูงสุด)</option>
+                              </select>
+                            </td>
+                            <td>
+                              <button
+                                onClick={() => handleDirectToggleActive(u.id, u.isActive)}
+                                style={{
+                                  padding: '4px 12px',
+                                  borderRadius: 20,
+                                  border: 'none',
+                                  fontSize: '0.8rem',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                  background: u.isActive ? '#d1fae5' : '#fee2e2',
+                                  color: u.isActive ? '#065f46' : '#991b1b',
+                                }}
+                              >
+                                {u.isActive ? '● Active' : '○ Inactive'}
+                              </button>
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <div style={{ display: 'inline-flex', gap: 8 }}>
+                                <button
+                                  onClick={() => openEditModal(u)}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: 6,
+                                    border: '1px solid var(--sa-border)',
+                                    background: '#ffffff',
+                                    color: '#374151',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                  }}
+                                  title="แก้ไขข้อมูล"
+                                >
+                                  ✏️ แก้ไข
+                                </button>
+                                <button
+                                  onClick={() => openDeleteModal(u)}
+                                  style={{
+                                    padding: '6px 12px',
+                                    borderRadius: 6,
+                                    border: 'none',
+                                    background: '#fee2e2',
+                                    color: '#b91c1c',
+                                    fontSize: '0.82rem',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                  }}
+                                  title="ลบผู้ใช้"
+                                >
+                                  🗑️ ลบ
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
         </div>
-      </div>
+      </main>
+
+      {/* ================= MODAL: ADD USER ================= */}
+      {showAddModal && (
+        <div className="superadmin-modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="superadmin-modal" style={{ maxWidth: 540 }} onClick={(e) => e.stopPropagation()}>
+            <div className="superadmin-modal-header">
+              <h3>+ เพิ่มผู้ใช้งานใหม่</h3>
+              <button className="superadmin-modal-close" onClick={() => setShowAddModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleAddUser}>
+              <div className="superadmin-modal-body">
+                {modalError && (
+                  <div style={{ padding: '8px 12px', background: '#fee2e2', color: '#b91c1c', borderRadius: 6, fontSize: '0.85rem' }}>
+                    ⚠️ {modalError}
+                  </div>
+                )}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="superadmin-form-group">
+                    <label>ชื่อจริง (First Name)</label>
+                    <input
+                      type="text"
+                      placeholder="เช่น สมชาย"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div className="superadmin-form-group">
+                    <label>นามสกุล (Last Name)</label>
+                    <input
+                      type="text"
+                      placeholder="เช่น สว่างดี"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="superadmin-form-group">
+                  <label>แผนก (Department)</label>
+                  <select
+                    value={formData.departmentId}
+                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                  >
+                    <option value="">-- ไม่ระบุแผนก --</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="superadmin-form-group">
+                  <label>ชื่อผู้ใช้งาน (Username) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="เช่น somchai_pea"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  />
+                </div>
+                <div className="superadmin-form-group">
+                  <label>อีเมล (Email) *</label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="เช่น somchai@pea.co.th"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div className="superadmin-form-group">
+                  <label>รหัสผ่าน (Password) * (อย่างน้อย 8 ตัวอักษร)</label>
+                  <input
+                    type="password"
+                    required
+                    minLength={8}
+                    placeholder="กำหนดรหัสผ่าน"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                </div>
+                <div className="superadmin-form-group">
+                  <label>บทบาท (Role) *</label>
+                  <select
+                    value={formData.roleId}
+                    onChange={(e) => setFormData({ ...formData, roleId: Number(e.target.value) })}
+                  >
+                    <option value={1}>👤 User (ผู้ใช้งานทั่วไป)</option>
+                    <option value={2}>🛡️ Admin (ผู้ดูแลระบบ)</option>
+                    <option value={3}>🔑 Super Admin (ผู้ดูแลระบบสูงสุด)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="superadmin-modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowAddModal(false)}>
+                  ยกเลิก
+                </button>
+                <button type="submit" className="superadmin-btn-primary" disabled={modalLoading}>
+                  {modalLoading ? 'กำลังบันทึก...' : 'บันทึกผู้ใช้'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: EDIT USER ================= */}
+      {showEditModal && selectedUser && (
+        <div className="superadmin-modal-overlay" onClick={() => setShowEditModal(false)}>
+          <div className="superadmin-modal" style={{ maxWidth: 540 }} onClick={(e) => e.stopPropagation()}>
+            <div className="superadmin-modal-header">
+              <h3>✏️ แก้ไขข้อมูล: {selectedUser.username}</h3>
+              <button className="superadmin-modal-close" onClick={() => setShowEditModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleEditUser}>
+              <div className="superadmin-modal-body">
+                {modalError && (
+                  <div style={{ padding: '8px 12px', background: '#fee2e2', color: '#b91c1c', borderRadius: 6, fontSize: '0.85rem' }}>
+                    ⚠️ {modalError}
+                  </div>
+                )}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="superadmin-form-group">
+                    <label>ชื่อจริง (First Name)</label>
+                    <input
+                      type="text"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div className="superadmin-form-group">
+                    <label>นามสกุล (Last Name)</label>
+                    <input
+                      type="text"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="superadmin-form-group">
+                  <label>แผนก (Department)</label>
+                  <select
+                    value={formData.departmentId}
+                    onChange={(e) => setFormData({ ...formData, departmentId: e.target.value })}
+                  >
+                    <option value="">-- ไม่ระบุแผนก --</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="superadmin-form-group">
+                  <label>ชื่อผู้ใช้งาน (Username)</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  />
+                </div>
+                <div className="superadmin-form-group">
+                  <label>อีเมล (Email)</label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+                <div className="superadmin-form-group">
+                  <label>บทบาท (Role)</label>
+                  <select
+                    value={formData.roleId}
+                    onChange={(e) => setFormData({ ...formData, roleId: Number(e.target.value) })}
+                  >
+                    <option value={1}>👤 User (ผู้ใช้งานทั่วไป)</option>
+                    <option value={2}>🛡️ Admin (ผู้ดูแลระบบ)</option>
+                    <option value={3}>🔑 Super Admin (ผู้ดูแลระบบสูงสุด)</option>
+                  </select>
+                </div>
+                <div className="superadmin-form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <input
+                    type="checkbox"
+                    id="isActiveCheck"
+                    style={{ width: 18, height: 18, cursor: 'pointer' }}
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                  />
+                  <label htmlFor="isActiveCheck" style={{ cursor: 'pointer', marginBottom: 0 }}>
+                    เปิดใช้งานบัญชีนี้ (Active)
+                  </label>
+                </div>
+              </div>
+              <div className="superadmin-modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowEditModal(false)}>
+                  ยกเลิก
+                </button>
+                <button type="submit" className="superadmin-btn-primary" disabled={modalLoading}>
+                  {modalLoading ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: DELETE USER ================= */}
+      {showDeleteModal && selectedUser && (
+        <div className="superadmin-modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="superadmin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="superadmin-modal-header">
+              <h3>🗑️ ยืนยันการลบผู้ใช้งาน</h3>
+              <button className="superadmin-modal-close" onClick={() => setShowDeleteModal(false)}>×</button>
+            </div>
+            <div className="superadmin-modal-body">
+              {modalError && (
+                <div style={{ padding: '8px 12px', background: '#fee2e2', color: '#b91c1c', borderRadius: 6, fontSize: '0.85rem' }}>
+                  ⚠️ {modalError}
+                </div>
+              )}
+              <p style={{ margin: 0, fontSize: '0.95rem', color: '#374151' }}>
+                คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ <strong>{selectedUser.username}</strong> ({selectedUser.role})?
+              </p>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '8px 0 0' }}>
+                บัญชีผู้ใช้นี้จะถูกปิดการใช้งาน (Deactivate) และจะไม่สามารถเข้าสู่ระบบได้
+              </p>
+            </div>
+            <div className="superadmin-modal-footer">
+              <button type="button" className="btn-secondary" onClick={() => setShowDeleteModal(false)}>
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={handleDeleteUser}
+                disabled={modalLoading}
+              >
+                {modalLoading ? 'กำลังลบ...' : 'ยืนยันลบผู้ใช้'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: ADD DEPARTMENT ================= */}
+      {showAddDeptModal && (
+        <div className="superadmin-modal-overlay" onClick={() => setShowAddDeptModal(false)}>
+          <div className="superadmin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="superadmin-modal-header">
+              <h3>🏢 + เพิ่มแผนกใหม่</h3>
+              <button className="superadmin-modal-close" onClick={() => setShowAddDeptModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleAddDept}>
+              <div className="superadmin-modal-body">
+                {modalError && (
+                  <div style={{ padding: '8px 12px', background: '#fee2e2', color: '#b91c1c', borderRadius: 6, fontSize: '0.85rem' }}>
+                    ⚠️ {modalError}
+                  </div>
+                )}
+                <div className="superadmin-form-group">
+                  <label>ชื่อแผนก (Department Name) *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="เช่น แผนกปฏิบัติการและบำรุงรักษา"
+                    value={deptFormData.name}
+                    onChange={(e) => setDeptFormData({ ...deptFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="superadmin-form-group">
+                  <label>รายละเอียด / ขอบเขตงาน</label>
+                  <input
+                    type="text"
+                    placeholder="เช่น ดูแลบำรุงรักษาระบบสายส่งและจำหน่ายไฟฟ้า"
+                    value={deptFormData.description}
+                    onChange={(e) => setDeptFormData({ ...deptFormData, description: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="superadmin-modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowAddDeptModal(false)}>
+                  ยกเลิก
+                </button>
+                <button type="submit" className="superadmin-btn-primary" disabled={modalLoading}>
+                  {modalLoading ? 'กำลังบันทึก...' : 'บันทึกแผนก'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: EDIT DEPARTMENT ================= */}
+      {showEditDeptModal && selectedDept && (
+        <div className="superadmin-modal-overlay" onClick={() => setShowEditDeptModal(false)}>
+          <div className="superadmin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="superadmin-modal-header">
+              <h3>✏️ แก้ไขแผนก: {selectedDept.name}</h3>
+              <button className="superadmin-modal-close" onClick={() => setShowEditDeptModal(false)}>×</button>
+            </div>
+            <form onSubmit={handleEditDept}>
+              <div className="superadmin-modal-body">
+                {modalError && (
+                  <div style={{ padding: '8px 12px', background: '#fee2e2', color: '#b91c1c', borderRadius: 6, fontSize: '0.85rem' }}>
+                    ⚠️ {modalError}
+                  </div>
+                )}
+                <div className="superadmin-form-group">
+                  <label>ชื่อแผนก (Department Name) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={deptFormData.name}
+                    onChange={(e) => setDeptFormData({ ...deptFormData, name: e.target.value })}
+                  />
+                </div>
+                <div className="superadmin-form-group">
+                  <label>รายละเอียด / ขอบเขตงาน</label>
+                  <input
+                    type="text"
+                    value={deptFormData.description}
+                    onChange={(e) => setDeptFormData({ ...deptFormData, description: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="superadmin-modal-footer">
+                <button type="button" className="btn-secondary" onClick={() => setShowEditDeptModal(false)}>
+                  ยกเลิก
+                </button>
+                <button type="submit" className="superadmin-btn-primary" disabled={modalLoading}>
+                  {modalLoading ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: DELETE DEPARTMENT ================= */}
+      {showDeleteDeptModal && selectedDept && (
+        <div className="superadmin-modal-overlay" onClick={() => setShowDeleteDeptModal(false)}>
+          <div className="superadmin-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="superadmin-modal-header">
+              <h3>🗑️ ยืนยันการลบแผนก</h3>
+              <button className="superadmin-modal-close" onClick={() => setShowDeleteDeptModal(false)}>×</button>
+            </div>
+            <div className="superadmin-modal-body">
+              {modalError && (
+                <div style={{ padding: '8px 12px', background: '#fee2e2', color: '#b91c1c', borderRadius: 6, fontSize: '0.85rem' }}>
+                  ⚠️ {modalError}
+                </div>
+              )}
+              <p style={{ margin: 0, fontSize: '0.95rem', color: '#374151' }}>
+                คุณแน่ใจหรือไม่ว่าต้องการลบแผนก <strong>{selectedDept.name}</strong>?
+              </p>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '8px 0 0' }}>
+                ผู้ใช้งานที่สังกัดแผนกนี้ ({selectedDept.userCount || 0} คน) จะถูกปลดสังกัดแผนกโดยอัตโนมัติ (ไม่ถูกลบบัญชี)
+              </p>
+            </div>
+            <div className="superadmin-modal-footer">
+              <button type="button" className="btn-secondary" onClick={() => setShowDeleteDeptModal(false)}>
+                ยกเลิก
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={handleDeleteDept}
+                disabled={modalLoading}
+              >
+                {modalLoading ? 'กำลังลบ...' : 'ยืนยันลบแผนก'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
-}
-
-function StatCard({ label, value, color }) {
-  return (
-    <div style={{
-      background: 'rgba(255,255,255,0.08)',
-      borderRadius: 12,
-      padding: '20px 24px',
-      textAlign: 'center',
-      borderLeft: `4px solid ${color}`,
-    }}>
-      <div style={{ fontSize: '2rem', fontWeight: 700 }}>{value}</div>
-      <div style={{ opacity: 0.7, fontSize: '0.85rem', marginTop: 4 }}>{label}</div>
-    </div>
-  )
-}
-
-function InfoRow({ label, value }) {
-  return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-      <span style={{ fontWeight: 600, minWidth: 110, opacity: 0.7, fontSize: '0.9rem' }}>{label}</span>
-      <span>{value}</span>
-    </div>
-  )
-}
-
-const refreshBtn = {
-  padding: '6px 16px',
-  background: 'var(--gold)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 8,
-  fontWeight: 600,
-  fontSize: '0.85rem',
-  cursor: 'pointer',
-  fontFamily: 'var(--font)',
-}
-
-const selectStyle = {
-  padding: '4px 8px',
-  borderRadius: 6,
-  border: '1px solid rgba(255,255,255,0.3)',
-  background: 'rgba(255,255,255,0.1)',
-  color: '#fff',
-  fontSize: '0.8rem',
-  fontFamily: 'var(--font)',
-  cursor: 'pointer',
-}
-
-const smallBtn = {
-  padding: '4px 12px',
-  border: 'none',
-  borderRadius: 6,
-  color: '#fff',
-  fontSize: '0.8rem',
-  fontWeight: 600,
-  cursor: 'pointer',
-  fontFamily: 'var(--font)',
 }

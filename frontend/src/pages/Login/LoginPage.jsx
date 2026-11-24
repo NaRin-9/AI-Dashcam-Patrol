@@ -73,7 +73,13 @@ export default function LoginPage() {
         navigate('/dashboard', { replace: true })
       }
     } catch (err) {
-      setApiError(err.message || (lang === 'TH' ? 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง' : 'Invalid credentials'))
+      let msg = err.message
+      if (msg === 'invalid credentials') {
+        msg = lang === 'TH' ? 'ชื่อผู้ใช้งาน/อีเมล หรือรหัสผ่านไม่ถูกต้อง' : 'Invalid username/email or password'
+      } else if (msg === 'account is deactivated') {
+        msg = lang === 'TH' ? 'บัญชีผู้ใช้นี้ถูกปิดการใช้งาน (Deactivated)' : 'Account is deactivated'
+      }
+      setApiError(msg || (lang === 'TH' ? 'รหัสพนักงานหรือรหัสผ่านไม่ถูกต้อง' : 'Invalid credentials'))
       setLoading(false)
       setLoginStatus('loading')
     }

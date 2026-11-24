@@ -58,6 +58,7 @@ export const routes = [
   {
     path: '/admin',
     label: 'Admin',
+    bare: true,
     element: (
       <ProtectedRoute roles={['admin', 'superadmin']}>
         <AdminDashboardPage />
@@ -68,6 +69,7 @@ export const routes = [
   {
     path: '/superadmin',
     label: 'Super Admin',
+    bare: true,
     element: (
       <ProtectedRoute roles={['superadmin']}>
         <SuperadminDashboardPage />

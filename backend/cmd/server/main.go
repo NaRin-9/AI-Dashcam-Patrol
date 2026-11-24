@@ -52,10 +52,12 @@ func main() {
 	// สร้าง Service instances
 	authService := services.NewAuthService(db, cfg)
 	userService := services.NewUserService(db)
+	deptService := services.NewDepartmentService(db)
 
 	// สร้าง Controller instances
 	authController := controllers.NewAuthController(authService, userService)
 	userController := controllers.NewUserController(userService)
+	deptController := controllers.NewDepartmentController(deptService)
 	riskReportsController := controllers.NewRiskReportsController()
 	videoUploadsController := controllers.NewVideoUploadsController(db, videoUploadDir())
 
@@ -63,6 +65,7 @@ func main() {
 	router := routes.Setup(routes.Dependencies{
 		AuthController:         authController,
 		UserController:         userController,
+		DepartmentController:   deptController,
 		RiskReportsController:  riskReportsController,
 		VideoUploadsController: videoUploadsController,
 		JWTSecret:              cfg.JWTSecret,

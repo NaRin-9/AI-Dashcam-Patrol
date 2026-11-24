@@ -23,16 +23,21 @@ func NewUserService(db *sql.DB) *UserService {
 	return &UserService{db: db}
 }
 
-// GetByID ดึงข้อมูล user ตาม id พร้อม role name
+// GetByID ดึงข้อมูล user ตาม id พร้อม role name และ department
 func (s *UserService) GetByID(ctx context.Context, id string) (*user.User, error) {
 	var user user.User
 	err := s.db.QueryRowContext(ctx,
-		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
-		 FROM users u JOIN roles r ON u.role_id = r.id
+		`SELECT u.id, u.username, u.email, COALESCE(u.first_name, ''), COALESCE(u.last_name, ''),
+		        u.department_id, COALESCE(d.name, ''),
+		        u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
+		 FROM users u
+		 JOIN roles r ON u.role_id = r.id
+		 LEFT JOIN departments d ON u.department_id = d.id
 		 WHERE u.id = $1`,
 		id,
-	).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash,
-		&user.RoleID, &user.RoleName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Username, &user.Email, &user.FirstName, &user.LastName,
+		&user.DepartmentID, &user.DepartmentName,
+		&user.PasswordHash, &user.RoleID, &user.RoleName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("user not found")
@@ -42,11 +47,15 @@ func (s *UserService) GetByID(ctx context.Context, id string) (*user.User, error
 	return &user, nil
 }
 
-// GetAll ดึงข้อมูล user ทั้งหมดพร้อม role name (สำหรับ admin)
+// GetAll ดึงข้อมูล user ทั้งหมดพร้อม role name และ department (สำหรับ admin)
 func (s *UserService) GetAll(ctx context.Context) ([]user.User, error) {
 	rows, err := s.db.QueryContext(ctx,
-		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
-		 FROM users u JOIN roles r ON u.role_id = r.id
+		`SELECT u.id, u.username, u.email, COALESCE(u.first_name, ''), COALESCE(u.last_name, ''),
+		        u.department_id, COALESCE(d.name, ''),
+		        u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
+		 FROM users u
+		 JOIN roles r ON u.role_id = r.id
+		 LEFT JOIN departments d ON u.department_id = d.id
 		 ORDER BY u.created_at DESC`,
 	)
 	if err != nil {
@@ -57,8 +66,9 @@ func (s *UserService) GetAll(ctx context.Context) ([]user.User, error) {
 	var users []user.User
 	for rows.Next() {
 		var u user.User
-		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.PasswordHash,
-			&u.RoleID, &u.RoleName, &u.IsActive, &u.CreatedAt, &u.UpdatedAt); err != nil {
+		if err := rows.Scan(&u.ID, &u.Username, &u.Email, &u.FirstName, &u.LastName,
+			&u.DepartmentID, &u.DepartmentName,
+			&u.PasswordHash, &u.RoleID, &u.RoleName, &u.IsActive, &u.CreatedAt, &u.UpdatedAt); err != nil {
 			return nil, fmt.Errorf("cannot scan user: %w", err)
 		}
 		users = append(users, u)
@@ -70,8 +80,11 @@ func (s *UserService) GetAll(ctx context.Context) ([]user.User, error) {
 func (s *UserService) UpdateProfile(ctx context.Context, userID string, req user.UpdateUserRequest) (*user.User, error) {
 	// ไม่อนุญาตให้ user ทั่วไปเปลี่ยน isActive
 	safeReq := user.UpdateUserRequest{
-		Username: req.Username,
-		Email:    req.Email,
+		Username:     req.Username,
+		Email:        req.Email,
+		FirstName:    req.FirstName,
+		LastName:     req.LastName,
+		DepartmentID: req.DepartmentID,
 	}
 	return s.updateUser(ctx, userID, safeReq)
 }
@@ -102,17 +115,65 @@ func (s *UserService) ChangePassword(ctx context.Context, userID string, req use
 	return err
 }
 
-// AdminUpdateUser admin อัปเดตข้อมูล user (username, email, isActive)
-func (s *UserService) AdminUpdateUser(ctx context.Context, adminUser user.User, targetUserID string, req user.UpdateUserRequest) (*user.User, error) {
-	// ตรวจสอบ target user
-	target, err := s.GetByID(ctx, targetUserID)
+// AdminCreateUser สร้างผู้ใช้งานใหม่โดย admin หรือ superadmin
+func (s *UserService) AdminCreateUser(ctx context.Context, adminUser user.User, req user.AdminCreateUserRequest) (*user.User, error) {
+	// ตรวจสอบว่า roleId ถูกต้องหรือไม่
+	var roleName string
+	err := s.db.QueryRowContext(ctx, `SELECT name FROM roles WHERE id = $1`, req.RoleID).Scan(&roleName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid role id: %d", req.RoleID)
 	}
 
-	// admin ไม่สามารถแก้ไข superadmin ได้
-	if target.RoleName == "superadmin" && adminUser.RoleName != "superadmin" {
-		return nil, fmt.Errorf("cannot modify superadmin account")
+	// ตรวจสอบ username ซ้ำ
+	var existingCount int
+	err = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users WHERE username = $1`, req.Username).Scan(&existingCount)
+	if err != nil {
+		return nil, fmt.Errorf("cannot check username: %w", err)
+	}
+	if existingCount > 0 {
+		return nil, fmt.Errorf("username already taken")
+	}
+
+	// ตรวจสอบ email ซ้ำ
+	err = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users WHERE email = $1`, req.Email).Scan(&existingCount)
+	if err != nil {
+		return nil, fmt.Errorf("cannot check email: %w", err)
+	}
+	if existingCount > 0 {
+		return nil, fmt.Errorf("email already in use")
+	}
+
+	// Hash password
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fmt.Errorf("cannot hash password: %w", err)
+	}
+
+	var deptID any = req.DepartmentID
+	if req.DepartmentID != nil && *req.DepartmentID <= 0 {
+		deptID = nil
+	}
+
+	var newUserID string
+	err = s.db.QueryRowContext(ctx,
+		`INSERT INTO users (username, email, first_name, last_name, department_id, password_hash, role_id, is_active)
+		 VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+		 RETURNING id`,
+		req.Username, req.Email, req.FirstName, req.LastName, deptID, string(hash), req.RoleID,
+	).Scan(&newUserID)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create user: %w", err)
+	}
+
+	return s.GetByID(ctx, newUserID)
+}
+
+// AdminUpdateUser admin/superadmin อัปเดตข้อมูล user (username, email, isActive)
+func (s *UserService) AdminUpdateUser(ctx context.Context, adminUser user.User, targetUserID string, req user.UpdateUserRequest) (*user.User, error) {
+	// ตรวจสอบ target user
+	_, err := s.GetByID(ctx, targetUserID)
+	if err != nil {
+		return nil, err
 	}
 
 	return s.updateUser(ctx, targetUserID, req)
@@ -130,17 +191,6 @@ func (s *UserService) AdminChangeRole(ctx context.Context, adminUser user.User, 
 	err = s.db.QueryRowContext(ctx, `SELECT name FROM roles WHERE id = $1`, req.RoleID).Scan(&newRoleName)
 	if err != nil {
 		return nil, fmt.Errorf("invalid role id")
-	}
-
-	// Admin ห้ามเลื่อนตำแหน่งหรือลดตำแหน่ง superadmin
-	if adminUser.RoleName != "superadmin" {
-		if target.RoleName == "superadmin" || newRoleName == "superadmin" {
-			return nil, fmt.Errorf("only superadmin can change roles to/from superadmin")
-		}
-		// admin ไม่สามารถจัดการ role ของ admin อื่นได้ ต้องเป็น superadmin
-		if target.RoleName == "admin" || newRoleName == "admin" {
-			return nil, fmt.Errorf("only superadmin can manage admin roles")
-		}
 	}
 
 	// ป้องกันการ demote superadmin คนสุดท้าย
@@ -174,11 +224,6 @@ func (s *UserService) AdminDeleteUser(ctx context.Context, adminUser user.User, 
 	target, err := s.GetByID(ctx, targetUserID)
 	if err != nil {
 		return err
-	}
-
-	// admin ไม่สามารถลบ superadmin ได้ (เฉพาะ superadmin ด้วยกัน)
-	if target.RoleName == "superadmin" && adminUser.RoleName != "superadmin" {
-		return fmt.Errorf("cannot delete superadmin account")
 	}
 
 	// ป้องกันลบ superadmin คนสุดท้าย
@@ -237,6 +282,25 @@ func (s *UserService) updateUser(ctx context.Context, userID string, req user.Up
 	if req.Email != nil {
 		query += fmt.Sprintf(`, email = $%d`, argIdx)
 		args = append(args, *req.Email)
+		argIdx++
+	}
+	if req.FirstName != nil {
+		query += fmt.Sprintf(`, first_name = $%d`, argIdx)
+		args = append(args, *req.FirstName)
+		argIdx++
+	}
+	if req.LastName != nil {
+		query += fmt.Sprintf(`, last_name = $%d`, argIdx)
+		args = append(args, *req.LastName)
+		argIdx++
+	}
+	if req.DepartmentID != nil {
+		query += fmt.Sprintf(`, department_id = $%d`, argIdx)
+		if *req.DepartmentID <= 0 {
+			args = append(args, nil)
+		} else {
+			args = append(args, *req.DepartmentID)
+		}
 		argIdx++
 	}
 	if req.IsActive != nil {

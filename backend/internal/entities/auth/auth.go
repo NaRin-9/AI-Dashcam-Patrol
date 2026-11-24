@@ -7,9 +7,12 @@ import (
 
 // RegisterRequest คำขอลงทะเบียนผู้ใช้ใหม่
 type RegisterRequest struct {
-	Username string `json:"username" binding:"required,min=3,max=100"`
-	Email    string `json:"email" binding:"required,email"`
-	Password string `json:"password" binding:"required,min=8"`
+	Username     string `json:"username" binding:"required,min=3,max=100"`
+	Email        string `json:"email" binding:"required,email"`
+	Password     string `json:"password" binding:"required,min=8"`
+	FirstName    string `json:"firstName"`
+	LastName     string `json:"lastName"`
+	DepartmentID *int   `json:"departmentId"`
 }
 
 // LoginRequest คำขอเข้าสู่ระบบ

@@ -14,6 +14,7 @@ import (
 type Dependencies struct {
 	AuthController         *controllers.AuthController
 	UserController         *controllers.UserController
+	DepartmentController   *controllers.DepartmentController
 	RiskReportsController  *controllers.RiskReportsController
 	VideoUploadsController *controllers.VideoUploadsController
 	JWTSecret              string
@@ -54,25 +55,50 @@ func Setup(deps Dependencies) *gin.Engine {
 			// Data endpoints
 			authenticated.GET("/risk-reports", deps.RiskReportsController.ListRiskReports)
 			authenticated.GET("/live-map", controllers.GetLiveMap)
+			if deps.DepartmentController != nil {
+				authenticated.GET("/departments", deps.DepartmentController.List)
+				authenticated.GET("/departments/:id", deps.DepartmentController.Get)
+			}
 			if deps.VideoUploadsController != nil {
 				authenticated.GET("/videos", deps.VideoUploadsController.ListMine)
 				authenticated.POST("/videos", deps.VideoUploadsController.Upload)
 			}
 
-			// Admin & Superadmin endpoints (จัดการผู้ใช้ทั่วไป)
+			// Admin & Superadmin endpoints (จัดการผู้ใช้: เพิ่ม ลบ แก้ไข ทั้ง user, admin, superadmin)
 			admin := authenticated.Group("")
 			admin.Use(middleware.RequireRole("admin", "superadmin"))
 			{
 				admin.GET("/users", deps.UserController.ListUsers)
+				admin.POST("/users", deps.UserController.AdminCreateUser)
 				admin.GET("/users/:id", deps.UserController.GetUser)
 				admin.PUT("/users/:id", deps.UserController.AdminUpdateUser)
 				admin.GET("/roles", deps.UserController.ListRoles)
-
-				// จัดการ role และลบผู้ใช้ (มีการตรวจสอบเพิ่มเติมใน service)
-				// Admin: จัดการได้เฉพาะ ordinary users
-				// Superadmin: จัดการได้ทั้ง users, admins และ system-level
 				admin.PUT("/users/:id/role", deps.UserController.AdminChangeRole)
 				admin.DELETE("/users/:id", deps.UserController.AdminDeleteUser)
+
+				// Department management for admin/superadmin
+				if deps.DepartmentController != nil {
+					admin.GET("/departments", deps.DepartmentController.List)
+					admin.GET("/departments/:id", deps.DepartmentController.Get)
+					admin.POST("/departments", deps.DepartmentController.Create)
+					admin.PUT("/departments/:id", deps.DepartmentController.Update)
+					admin.DELETE("/departments/:id", deps.DepartmentController.Delete)
+
+					// Aliases with /admin prefix
+					admin.GET("/admin/departments", deps.DepartmentController.List)
+					admin.GET("/admin/departments/:id", deps.DepartmentController.Get)
+					admin.POST("/admin/departments", deps.DepartmentController.Create)
+					admin.PUT("/admin/departments/:id", deps.DepartmentController.Update)
+					admin.DELETE("/admin/departments/:id", deps.DepartmentController.Delete)
+				}
+
+				// Aliases for /admin/users to support frontend calling with /admin prefix
+				admin.GET("/admin/users", deps.UserController.ListUsers)
+				admin.POST("/admin/users", deps.UserController.AdminCreateUser)
+				admin.GET("/admin/users/:id", deps.UserController.GetUser)
+				admin.PUT("/admin/users/:id", deps.UserController.AdminUpdateUser)
+				admin.PUT("/admin/users/:id/role", deps.UserController.AdminChangeRole)
+				admin.DELETE("/admin/users/:id", deps.UserController.AdminDeleteUser)
 			}
 		}
 	}

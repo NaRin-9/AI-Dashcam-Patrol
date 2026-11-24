@@ -77,6 +77,24 @@ func (ctrl *UserController) ListUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"users": users})
 }
 
+// AdminCreateUser admin/superadmin สร้างผู้ใช้ใหม่: POST /api/users
+func (ctrl *UserController) AdminCreateUser(c *gin.Context) {
+	currentUser := middleware.GetCurrentUser(c)
+
+	var req user.AdminCreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	newUser, err := ctrl.userService.AdminCreateUser(c.Request.Context(), currentUser, req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"user": newUser})
+}
+
 // GetUser ดึงข้อมูล user ตาม id (admin+): GET /api/users/:id
 func (ctrl *UserController) GetUser(c *gin.Context) {
 	id := c.Param("id")
