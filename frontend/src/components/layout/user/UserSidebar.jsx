@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons'
 import logo from '@/assets/pea-logo.png'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import { Link } from '@/routes/router'
@@ -28,7 +29,9 @@ export default function UserSidebar({ activePage, expanded, onToggle }) {
           title={railLabel}
           onClick={onToggle}
         >
-          <img src={logo} alt="" width="48" height="48" />
+          <span className="dash-rail-toggle-icon" aria-hidden="true">
+            {expanded ? <DoubleLeftOutlined /> : <DoubleRightOutlined />}
+          </span>
         </button>
       )}
       <aside className="dash-rail" id={railId} inert={hasSideRail && !expanded}>
@@ -40,7 +43,7 @@ export default function UserSidebar({ activePage, expanded, onToggle }) {
           {navigationItems.map(({ page, path, icon, label }) => (
             <Link key={page} to={path} aria-current={activePage === page ? 'page' : undefined}>
               <UserIcon name={icon} />
-              {label}
+              <span>{label}</span>
             </Link>
           ))}
         </nav>

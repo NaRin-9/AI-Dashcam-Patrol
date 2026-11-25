@@ -40,3 +40,54 @@
 .my-videos-status[data-status="processing"] { background: #ede7f7; color: #4d2b86; }
 .my-videos-status[data-status="processed"] { background: #e1f3ea; color: #176447; }
 .my-videos-status[data-status="failed"] { background: #fae7ea; color: #9c2134; }
+
+@media (max-width: 760px) {
+  [data-page="videos"] .dash-search svg {
+    order: 1;
+    width: 34px;
+    height: 34px;
+    margin-inline-end: 3px;
+    padding: 7px;
+    border-radius: 50%;
+    background: #f3e3ef;
+    color: var(--purple-dark);
+  }
+  [data-page="videos"] .dash-content {
+    padding: 12px 12px calc(var(--dash-mobile-nav-height) + 12px);
+  }
+  .my-videos { padding: 0; border: 0; }
+  .my-videos > header { align-items: start; gap: 8px; margin-bottom: 12px; }
+  .my-videos > header h2 { font-size: 1.0625rem; }
+  .my-videos-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+  .my-videos-actions .my-videos-refresh,
+  .my-videos-actions .video-upload-trigger {
+    min-height: 44px;
+    padding: 6px 8px;
+    border-radius: 12px;
+    font-size: .875rem;
+  }
+  .my-videos-list { display: grid; gap: 8px; }
+  .my-videos-list li {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 4px 8px;
+    padding: 10px 8px;
+    border: 1px solid var(--dash-line);
+    border-radius: 14px;
+  }
+  .my-videos-icon { width: 32px; height: 32px; }
+  .my-videos-file { font-size: .875rem; }
+  .my-videos-file small, .my-videos-status { font-size: .75rem; }
+  .my-videos-status { max-width: min(28vw, 9rem); padding: 4px 6px; }
+  .my-videos > .dash-empty {
+    padding: 18px 12px;
+    border: 1px solid var(--dash-line);
+    border-radius: 14px;
+    background: #fcf9fc;
+    font-size: .875rem;
+    text-align: center;
+  }
+}

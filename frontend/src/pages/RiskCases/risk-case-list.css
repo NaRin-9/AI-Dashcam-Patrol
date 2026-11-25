@@ -59,7 +59,53 @@
 .risk-list-detail time, .risk-list-status.is-missing { color: var(--dash-muted); }
 .risk-list-detail time, .risk-list-status { font-size: .8125rem; }
 .risk-list-status { color: var(--purple); }
+.risk-list-filter { display: none; }
 
 @media (max-width: 760px) {
-  .risk-list .risk-list-row { font-size: .875rem; }
+  [data-page="cases"] .dash-search > label > svg { display: none; }
+  .risk-list-filter {
+    position: relative;
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #f3e3ef;
+    color: var(--purple-dark);
+  }
+  .risk-list-filter[data-active="true"] { background: var(--purple); color: #fff; }
+  .risk-list-filter:focus-within { outline: 2px solid var(--purple); outline-offset: -2px; }
+  .risk-list-filter select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  [data-page="cases"] .dash-content { padding: 8px 8px calc(var(--dash-mobile-nav-height) + 12px); }
+  .risk-list {
+    padding: 0;
+    border: 0;
+    font-size: .875rem;
+    --case-columns: minmax(0, 1fr) minmax(0, 2.2fr) minmax(0, 1fr);
+  }
+  .risk-list-tools {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+  }
+  .risk-list-columns span { padding-block: 8px; font-size: .8125rem; }
+  .risk-list-items { margin-top: 8px; }
+  .risk-list .risk-list-row {
+    min-height: 56px;
+    padding: 7px 2px;
+    border-radius: 16px;
+    font-size: .8125rem;
+  }
+  .risk-list-row > strong, .risk-list-status { padding-inline: 2px; }
+  .risk-list-detail time, .risk-list-status { font-size: .75rem; }
 }

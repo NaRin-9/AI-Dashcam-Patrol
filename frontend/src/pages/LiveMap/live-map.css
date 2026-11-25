@@ -3,7 +3,78 @@
 }
 
 @media (max-width: 760px) {
-  .dash-expanded-map .live-map-canvas {
-    height: max(300px, calc(100svh - 305px));
+  .patrol-dashboard[data-page="map"] { --dash-background: #fff; }
+  [data-page="map"] .dash-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100svh;
+    padding-bottom: var(--dash-mobile-nav-height);
   }
+  [data-page="map"] .dash-top {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    column-gap: 4px;
+    row-gap: 6px;
+    padding: max(4px, env(safe-area-inset-top)) 8px 4px;
+    border-bottom: 0;
+  }
+  [data-page="map"] .dash-top h1 {
+    grid-column: 2;
+    font-size: 1.0625rem;
+    text-align: center;
+  }
+  [data-page="map"] .dash-top-actions {
+    grid-column: 3;
+    grid-row: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+  [data-page="map"] .dash-map-back,
+  [data-page="map"] .dash-map-search-toggle {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--purple-dark);
+  }
+  [data-page="map"] .dash-account summary {
+    justify-content: center;
+    width: 44px;
+  }
+  [data-page="map"] .dash-account summary::after { display: none; }
+  [data-page="map"] .dash-account-identity {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+  }
+  [data-page="map"] .dash-search { margin: 0 2px 6px; }
+  [data-page="map"] .dash-search[data-expanded="false"] { display: none; }
+  [data-page="map"] .dash-content {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    padding: 0 8px;
+  }
+  .dash-expanded-map {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+  }
+  .dash-expanded-map .live-map-canvas {
+    flex: 1 0 auto;
+    height: auto;
+    min-height: 250px;
+    border-radius: 0;
+  }
+  .dash-expanded-map .dash-legend { margin: 6px 2px 0; font-size: .8125rem; }
+
+  .dash-expanded-map:has(.risk-details[open]) .live-map-canvas { filter: blur(2px); }
 }

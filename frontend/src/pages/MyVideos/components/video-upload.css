@@ -97,5 +97,6 @@
     border-radius: 18px 18px 0 0;
   }
   .video-upload form { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  .patrol-dashboard .video-upload-close { width: 44px; height: 44px; }
   .video-upload-items li { grid-template-columns: minmax(0, 1fr) minmax(0, auto); }
 }

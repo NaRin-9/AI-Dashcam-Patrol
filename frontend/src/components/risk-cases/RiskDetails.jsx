@@ -40,10 +40,12 @@ export default function RiskDetails({ riskCase, onClose }) {
           วันที่ตรวจพบ <time dateTime={riskCase.capturedAt}>{captureTime.format(new Date(riskCase.capturedAt))}</time>
         </p>
         <dl className="risk-details-fields">
-          <div><dt>รหัสเคส</dt><dd><strong>{riskCase.id}</strong></dd></div>
+          <div className="risk-details-case"><dt>รหัสเคส</dt><dd><strong>{riskCase.id}</strong></dd></div>
           <div><dt>รหัสเสาไฟ</dt><dd>{riskCase.poleId || 'ยังไม่มีข้อมูล'}</dd></div>
           <div><dt>ความเสี่ยง</dt><dd>{riskLabels[riskCase.riskLevel] ?? 'จุดเสี่ยง'}</dd></div>
-          <div><dt>สถานะงาน</dt><dd>{riskCase.statusLabel || 'ยังไม่มีข้อมูล'}</dd></div>
+          <div className="risk-details-status" data-has-status={Boolean(riskCase.statusLabel)}>
+            <dt>สถานะงาน</dt><dd>{riskCase.statusLabel || 'ยังไม่มีข้อมูล'}</dd>
+          </div>
           <div><dt>พิกัด</dt><dd>{latitude.toFixed(6)}, {longitude.toFixed(6)}</dd></div>
         </dl>
         <a className="risk-details-directions" href={mapsUrl.href} target="_blank" rel="noopener noreferrer">

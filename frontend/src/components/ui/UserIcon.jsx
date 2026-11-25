@@ -4,6 +4,7 @@ import {
   List,
   Video,
   Search,
+  ChevronLeft,
   ChevronRight,
   ExternalLink,
 } from 'lucide-react'
@@ -14,6 +15,7 @@ const iconComponents = {
   list: List,
   video: Video,
   search: Search,
+  back: ChevronLeft,
   arrow: ChevronRight,
   expand: ExternalLink,
 }
