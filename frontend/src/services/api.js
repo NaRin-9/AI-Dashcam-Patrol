@@ -57,8 +57,11 @@ async function apiFetch(path, options = {}) {
     credentials: 'include', // สำคัญสำหรับ cookie (refresh token)
   })
 
-  // ถ้าได้ 401 และไม่ใช่ request refresh ให้ลอง refresh token
-  if (res.status === 401 && !path.includes('/auth/refresh')) {
+  // ข้ามการ refresh token ถ้าเป็น auth endpoint (login, register, refresh)
+  const isAuthEndpoint = path.includes('/auth/login') || path.includes('/auth/register') || path.includes('/auth/refresh')
+
+  // ถ้าได้ 401 และไม่ใช่ auth endpoint ให้ลอง refresh token
+  if (res.status === 401 && !isAuthEndpoint) {
     const refreshed = await tryRefresh()
     if (refreshed) {
       headers['Authorization'] = `Bearer ${accessToken}`

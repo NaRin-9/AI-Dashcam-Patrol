@@ -39,16 +39,37 @@ func Migrate(db *sql.DB) error {
 			name VARCHAR(50) UNIQUE NOT NULL
 		)`,
 		`INSERT INTO roles (name) VALUES ('user'), ('admin'), ('superadmin') ON CONFLICT (name) DO NOTHING`,
+		`CREATE TABLE IF NOT EXISTS departments (
+			id SERIAL PRIMARY KEY,
+			name VARCHAR(100) UNIQUE NOT NULL,
+			description TEXT,
+			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+		)`,
+		`INSERT INTO departments (name, description) VALUES
+			('แผนกปฏิบัติการและบำรุงรักษา', 'ดูแลบำรุงรักษาระบบจำหน่ายและโครงข่ายไฟฟ้า'),
+			('แผนกก่อสร้างและพัฒนาระบบไฟฟ้า', 'งานก่อสร้าง ขยายเขต และปรับปรุงระบบไฟฟ้า'),
+			('แผนกมิเตอร์และหม้อแปลง', 'ตรวจสอบ ติดตั้ง และบำรุงรักษามิเตอร์และหม้อแปลง'),
+			('แผนกบริการลูกค้า', 'รับคำร้อง งานบริการผู้ใช้ไฟฟ้า และประสานงานเหตุขัดข้อง'),
+			('ฝ่ายเทคโนโลยีสารสนเทศ', 'พัฒนาระบบ AI และโครงสร้างพื้นฐานดิจิทัล')
+		ON CONFLICT (name) DO NOTHING`,
 		`CREATE TABLE IF NOT EXISTS users (
 			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 			username VARCHAR(100) UNIQUE NOT NULL,
 			email VARCHAR(255) UNIQUE NOT NULL,
+			first_name VARCHAR(100),
+			last_name VARCHAR(100),
+			department_id INTEGER REFERENCES departments(id) ON DELETE SET NULL,
 			password_hash VARCHAR(255) NOT NULL,
 			role_id INTEGER NOT NULL DEFAULT 1 REFERENCES roles(id),
 			is_active BOOLEAN NOT NULL DEFAULT true,
 			created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 			updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 		)`,
+		`ALTER TABLE users
+			ADD COLUMN IF NOT EXISTS first_name VARCHAR(100),
+			ADD COLUMN IF NOT EXISTS last_name VARCHAR(100),
+			ADD COLUMN IF NOT EXISTS department_id INTEGER REFERENCES departments(id) ON DELETE SET NULL`,
 		`CREATE TABLE IF NOT EXISTS refresh_tokens (
 			id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 			user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

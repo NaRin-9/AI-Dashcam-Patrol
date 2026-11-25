@@ -1,4 +1,13 @@
 import { useId, useState } from 'react'
+import {
+  LayoutGrid,
+  Map,
+  List,
+  Video,
+  Search,
+  ChevronRight,
+  ExternalLink,
+} from 'lucide-react'
 import logo from '@/assets/pea-logo.png'
 import { useAuth } from '@/contexts/AuthContext'
 import useMediaQuery from '@/hooks/useMediaQuery'
@@ -6,18 +15,20 @@ import { Link } from '@/routes/router'
 import VideoUpload from './VideoUpload'
 import './dashboard.css'
 
-const icons = {
-  overview: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
-  map: 'm3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z M9 3v15 M15 6v15',
-  list: 'M8 6h13 M8 12h13 M8 18h13 M3 6h.5 M3 12h.5 M3 18h.5',
-  video: 'M3 5h13v14H3z M16 10l5-3v10l-5-3',
-  search: 'M16.5 10a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z M15 15l6 6',
-  arrow: 'm9 5 7 7-7 7',
-  expand: 'M14 3h7v7 M21 3l-8 8 M10 5H4v15h15v-6',
+const iconComponents = {
+  overview: LayoutGrid,
+  map: Map,
+  list: List,
+  video: Video,
+  search: Search,
+  arrow: ChevronRight,
+  expand: ExternalLink,
 }
 
-export function Icon({ name }) {
-  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={icons[name]} /></svg>
+export function Icon({ name, size = 20, className = '' }) {
+  const Component = iconComponents[name]
+  if (!Component) return null
+  return <Component size={size} className={className} strokeWidth={1.7} aria-hidden="true" />
 }
 
 function AccountMenu() {

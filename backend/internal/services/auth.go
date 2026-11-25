@@ -40,11 +40,11 @@ func (s *AuthService) Register(ctx context.Context, req auth.RegisterRequest) (*
 
 	var user user.User
 	err = s.db.QueryRowContext(ctx,
-		`INSERT INTO users (username, email, password_hash, role_id)
-		 VALUES ($1, $2, $3, 1)
-		 RETURNING id, username, email, password_hash, role_id, is_active, created_at, updated_at`,
-		req.Username, req.Email, string(hash),
-	).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash,
+		`INSERT INTO users (username, email, first_name, last_name, department_id, password_hash, role_id)
+		 VALUES ($1, $2, $3, $4, $5, $6, 1)
+		 RETURNING id, username, email, COALESCE(first_name, ''), COALESCE(last_name, ''), department_id, password_hash, role_id, is_active, created_at, updated_at`,
+		req.Username, req.Email, req.FirstName, req.LastName, req.DepartmentID, string(hash),
+	).Scan(&user.ID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.DepartmentID, &user.PasswordHash,
 		&user.RoleID, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create user: %w", err)
@@ -53,16 +53,21 @@ func (s *AuthService) Register(ctx context.Context, req auth.RegisterRequest) (*
 	return &user, nil
 }
 
-// Login ตรวจสอบ credentials แล้วสร้าง tokens
+// Login ตรวจสอบ credentials แล้วสร้าง tokens (รองรับทั้ง username และ email แบบ case-insensitive)
 func (s *AuthService) Login(ctx context.Context, req auth.LoginRequest) (*auth.AuthResponse, string, error) {
 	var user user.User
 	err := s.db.QueryRowContext(ctx,
-		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
-		 FROM users u JOIN roles r ON u.role_id = r.id
-		 WHERE u.username = $1`,
+		`SELECT u.id, u.username, u.email, COALESCE(u.first_name, ''), COALESCE(u.last_name, ''),
+		        u.department_id, COALESCE(d.name, ''),
+		        u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
+		 FROM users u
+		 JOIN roles r ON u.role_id = r.id
+		 LEFT JOIN departments d ON u.department_id = d.id
+		 WHERE LOWER(u.username) = LOWER($1) OR LOWER(u.email) = LOWER($1)`,
 		req.Username,
-	).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash,
-		&user.RoleID, &user.RoleName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Username, &user.Email, &user.FirstName, &user.LastName,
+		&user.DepartmentID, &user.DepartmentName,
+		&user.PasswordHash, &user.RoleID, &user.RoleName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, "", fmt.Errorf("invalid credentials")
@@ -129,12 +134,17 @@ func (s *AuthService) RefreshToken(ctx context.Context, rawToken string) (*auth.
 	// ดึงข้อมูล user
 	var user user.User
 	err = s.db.QueryRowContext(ctx,
-		`SELECT u.id, u.username, u.email, u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
-		 FROM users u JOIN roles r ON u.role_id = r.id
+		`SELECT u.id, u.username, u.email, COALESCE(u.first_name, ''), COALESCE(u.last_name, ''),
+		        u.department_id, COALESCE(d.name, ''),
+		        u.password_hash, u.role_id, r.name, u.is_active, u.created_at, u.updated_at
+		 FROM users u
+		 JOIN roles r ON u.role_id = r.id
+		 LEFT JOIN departments d ON u.department_id = d.id
 		 WHERE u.id = $1`,
 		rt.UserID,
-	).Scan(&user.ID, &user.Username, &user.Email, &user.PasswordHash,
-		&user.RoleID, &user.RoleName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
+	).Scan(&user.ID, &user.Username, &user.Email, &user.FirstName, &user.LastName,
+		&user.DepartmentID, &user.DepartmentName,
+		&user.PasswordHash, &user.RoleID, &user.RoleName, &user.IsActive, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, "", fmt.Errorf("cannot query user: %w", err)
 	}
