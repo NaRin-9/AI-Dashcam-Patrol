@@ -1,0 +1,111 @@
+@media (width > 1000px) {
+  .risk-list-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  }
+}
+
+.risk-list {
+  --case-columns: minmax(0, 1fr) minmax(0, 2.5fr) minmax(0, 1fr);
+}
+.risk-list-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 14px;
+  color: var(--dash-muted);
+  font-size: .875rem;
+}
+.risk-list-tools label { display: flex; align-items: center; gap: 8px; }
+.risk-list-tools select {
+  padding: 6px 8px;
+  border: 1px solid var(--dash-line);
+  border-radius: 8px;
+  color: var(--purple-dark);
+  background: white;
+  font: inherit;
+}
+.risk-list-columns, .risk-list-row {
+  display: grid;
+  grid-template-columns: var(--case-columns);
+  align-items: center;
+  gap: 6px;
+}
+.risk-list-columns span {
+  padding: 7px 2px;
+  border-radius: 999px;
+  color: #271a05;
+  background: var(--gold);
+  text-align: center;
+  font-size: .9375rem;
+  font-weight: 700;
+}
+.risk-list-items { display: grid; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
+.risk-list .risk-list-row {
+  width: 100%;
+  padding: 12px 0;
+  border: 1px solid var(--dash-line);
+  border-radius: 14px;
+  color: inherit;
+  background: white;
+  text-align: start;
+  font-size: .9375rem;
+}
+.risk-list-row:hover { background: #faf7fa; }
+.risk-list-row > * { min-width: 0; overflow-wrap: anywhere; }
+.risk-list-row > strong, .risk-list-status { padding-inline: 4px; text-align: center; }
+.risk-list-detail { display: grid; gap: 2px; }
+.risk-list-detail time, .risk-list-status.is-missing { color: var(--dash-muted); }
+.risk-list-detail time, .risk-list-status { font-size: .8125rem; }
+.risk-list-status { color: var(--purple); }
+.risk-list-filter { display: none; }
+
+@media (max-width: 760px) {
+  [data-page="cases"] .dash-search > label > svg { display: none; }
+  .risk-list-filter {
+    position: relative;
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #f3e3ef;
+    color: var(--purple-dark);
+  }
+  .risk-list-filter[data-active="true"] { background: var(--purple); color: #fff; }
+  .risk-list-filter:focus-within { outline: 2px solid var(--purple); outline-offset: -2px; }
+  .risk-list-filter select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+  [data-page="cases"] .dash-content { padding: 8px 8px calc(var(--dash-mobile-nav-height) + 12px); }
+  .risk-list {
+    padding: 0;
+    border: 0;
+    font-size: .875rem;
+    --case-columns: minmax(0, 1fr) minmax(0, 2.2fr) minmax(0, 1fr);
+  }
+  .risk-list-tools {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    overflow: hidden;
+  }
+  .risk-list-columns span { padding-block: 8px; font-size: .8125rem; }
+  .risk-list-items { margin-top: 8px; }
+  .risk-list .risk-list-row {
+    min-height: 56px;
+    padding: 7px 2px;
+    border-radius: 16px;
+    font-size: .8125rem;
+  }
+  .risk-list-row > strong, .risk-list-status { padding-inline: 2px; }
+  .risk-list-detail time, .risk-list-status { font-size: .75rem; }
+}

@@ -1,0 +1,183 @@
+.risk-details {
+  width: min(29rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  color: inherit;
+  background: white;
+  box-shadow: 0 12px 40px #20031c33;
+}
+
+.risk-details::backdrop {
+  background: #21111d59;
+}
+
+.risk-details-card {
+  display: grid;
+  gap: 12px;
+  padding: clamp(16px, 4vw, 22px);
+}
+
+.risk-details .risk-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+.risk-details-header h2 { margin: 0; font-size: 1.3rem; }
+
+.risk-details-header button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--dash-line);
+  border-radius: 50%;
+  color: var(--purple-dark);
+  background: white;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.risk-details-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: 8px;
+  background: #f5f4f6;
+  object-fit: contain;
+}
+
+.risk-details-no-image {
+  margin: 0;
+  padding: 18px 12px;
+  border: 1px dashed var(--dash-line);
+  border-radius: 8px;
+  background: #f5f4f6;
+  color: var(--dash-muted);
+  text-align: center;
+  font-size: .9375rem;
+}
+
+.risk-details-date {
+  margin: 0;
+  text-align: end;
+  color: var(--dash-muted);
+  font-size: .9375rem;
+}
+
+.risk-details-fields {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  font-size: 1rem;
+}
+
+.risk-details-fields > div {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: 10px;
+}
+
+.risk-details-fields dt { color: var(--dash-muted); }
+.risk-details-fields dd { margin: 0; overflow-wrap: anywhere; }
+
+.risk-details-directions {
+  justify-self: center;
+  padding: 8px 4px;
+  color: var(--purple);
+  font-size: 1rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  :is(.dash-expanded-map, .risk-list) .risk-details {
+    width: min(22rem, calc(100% - 48px));
+    max-height: calc(100dvh - 24px);
+    border-radius: 16px;
+    color: #251d25;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details::backdrop { background: #21111d20; }
+  :is(.dash-expanded-map, .risk-list) .risk-details-card { gap: 7px; padding: 6px 14px 12px; }
+  :is(.dash-expanded-map, .risk-list) .risk-details .risk-details-header {
+    position: relative;
+    justify-content: center;
+    min-height: 38px;
+    padding-inline: 40px;
+    text-align: center;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-header h2 { font-size: .9375rem; }
+  :is(.dash-expanded-map, .risk-list) .risk-details-header form {
+    position: absolute;
+    inset-inline-end: -8px;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-header button {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font-size: 1rem;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-header button::before {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 19px;
+    height: 19px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    content: '';
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-header button:focus-visible {
+    outline: 2px solid var(--purple);
+    outline-offset: -7px;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-image { border-radius: 4px; }
+  :is(.dash-expanded-map, .risk-list) .risk-details-no-image { font-size: .8125rem; }
+  :is(.dash-expanded-map, .risk-list) .risk-details-date { font-size: .75rem; }
+  :is(.dash-expanded-map, .risk-list) .risk-details-fields {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 8px;
+    font-size: .8125rem;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-fields > div {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 6px;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-fields dt::after { content: ':'; }
+  :is(.dash-expanded-map, .risk-list) .risk-details-fields:has([data-has-status="true"]) .risk-details-case {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-fields [data-has-status="true"] {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: start;
+    max-width: 26vw;
+    color: var(--purple-dark);
+    text-align: end;
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-fields [data-has-status="true"] dt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  :is(.dash-expanded-map, .risk-list) .risk-details-directions {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 6px;
+    font-size: .8125rem;
+  }
+}

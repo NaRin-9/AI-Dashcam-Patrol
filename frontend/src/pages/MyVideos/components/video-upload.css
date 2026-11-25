@@ -6,10 +6,13 @@
 }
 
 .patrol-dashboard .video-upload-trigger {
+  min-height: 44px;
   padding: 8px 12px;
   font-size: .9rem;
+  font-weight: 650;
 }
 
+.video-upload-trigger:hover { background: var(--purple-dark); }
 .video-upload-trigger span { font-size: 1.1rem; }
 
 .video-upload {
@@ -82,8 +85,6 @@
 .video-upload-progress, .video-upload-items .video-upload-error { grid-column: 1 / -1; }
 .video-upload-progress progress { flex: 1; accent-color: var(--purple); }
 .video-upload-submit { min-height: 42px; padding: 8px 16px; }
-.video-upload-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
-.video-upload-actions a { color: var(--purple); text-decoration: underline; }
 .video-upload button:disabled { opacity: .5; cursor: default; }
 
 @media (max-width: 760px) {
@@ -96,5 +97,6 @@
     border-radius: 18px 18px 0 0;
   }
   .video-upload form { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
+  .patrol-dashboard .video-upload-close { width: 44px; height: 44px; }
   .video-upload-items li { grid-template-columns: minmax(0, 1fr) minmax(0, auto); }
 }

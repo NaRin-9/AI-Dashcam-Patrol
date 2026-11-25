@@ -3,6 +3,8 @@
 // phoneElement = หน้าที่แสดงแทนบนมือถือ (กว้างไม่เกิน 760px) เช่น หน้าแรกบนมือถือเป็น Welcome
 // bare = true: แสดงเต็มจอโดยไม่มี Navbar (หน้า Welcome / Log In / Reset Password / Register)
 import HomePage from '@/pages/Home'
+import DashboardPage from '@/pages/Dashboard'
+import RiskCasesPage from '@/pages/RiskCases'
 import LiveMapPage from '@/pages/LiveMap'
 import RiskReportsPage from '@/pages/RiskReports'
 import HowItWorksPage from '@/pages/HowItWorks'
@@ -10,8 +12,7 @@ import LoginPage from '@/pages/Login'
 import RegisterPage from '@/pages/Register'
 import ResetPasswordPage from '@/pages/ResetPassword'
 import WelcomePage from '@/pages/Welcome'
-import DashboardPage from '@/pages/Dashboard'
-import MyVideosPage from '@/pages/Dashboard/MyVideosPage'
+import MyVideosPage from '@/pages/MyVideos'
 import AdminDashboardPage from '@/pages/AdminDashboard'
 import SuperadminDashboardPage from '@/pages/SuperadminDashboard'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
@@ -35,13 +36,20 @@ export const routes = [
   // Dashboard routes พร้อม Role-based route protection
   {
     path: '/dashboard',
-    label: 'Dashboard',
+    label: 'ภาพรวม',
     bare: true,
     element: (
       <ProtectedRoute>
         <DashboardPage />
       </ProtectedRoute>
     ),
+    showInNav: false,
+  },
+  {
+    path: '/risk-cases',
+    label: 'รายการจุดเสี่ยง',
+    bare: true,
+    element: <ProtectedRoute><RiskCasesPage /></ProtectedRoute>,
     showInNav: false,
   },
   {

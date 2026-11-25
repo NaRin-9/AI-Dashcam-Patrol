@@ -8,22 +8,47 @@
 | หน้า | โฟลเดอร์ | URL | ผู้รับผิดชอบ |
 |---|---|---|---|
 | หน้าแรก | `pages/Home` | `/` | |
+| ต้อนรับ | `pages/Welcome` | `/welcome` และ `/` บนมือถือ | |
+| ภาพรวมผู้ใช้ | `pages/Dashboard` | `/dashboard` | |
 | แผนที่ | `pages/LiveMap` | `/live-map` | |
+| รายการจุดเสี่ยง | `pages/RiskCases` | `/risk-cases` | |
+| วิดีโอของฉัน | `pages/MyVideos` | `/my-videos` | |
 | รายงานความเสี่ยง | `pages/RiskReports` | `/risk-reports` | |
 | วิธีการทำงาน | `pages/HowItWorks` | `/how-it-works` | |
 | เข้าสู่ระบบ | `pages/Login` | `/login` | |
+| สมัครบัญชี | `pages/Register` | `/register` | |
+| ตั้งรหัสผ่านใหม่ | `pages/ResetPassword` | `/reset-password` | |
+| ผู้ดูแลระบบ | `pages/AdminDashboard` | `/admin` | |
+| ผู้ดูแลระบบสูงสุด | `pages/SuperadminDashboard` | `/superadmin` | |
+| ไม่พบหน้า | `pages/NotFound` | เส้นทางที่ไม่ได้ลงทะเบียน | |
 
-ไฟล์ที่ใช้ร่วมกันหลายหน้า แก้แล้วให้บอกทีม
-- `frontend/src/routes/index.jsx` รายการหน้าและเมนู
-- `backend/internal/routes/routes.go` รายการ API
-- `src/components/` ส่วนประกอบที่ใช้หลายหน้า
-- `src/styles/global.css` สีและสไตล์หลัก
+## ไฟล์ที่ใช้ร่วมกัน
+
+แจ้งทีมเมื่อแก้ไฟล์ที่มีผลกับหลายหน้า
+
+| งาน | เริ่มจากไฟล์ |
+|---|---|
+| URL ของหน้า สิทธิ์การเข้าถึง และเมนูหลัก | [routes/index.jsx](frontend/src/routes/index.jsx) |
+| เมนูด้านซ้ายและลิงก์ระหว่างหน้าผู้ใช้ | [UserSidebar.jsx](frontend/src/components/layout/user/UserSidebar.jsx) |
+| หัวข้อหน้า ช่องค้นหา และเมนูบัญชี | [UserTopBar.jsx](frontend/src/components/layout/user/UserTopBar.jsx) |
+| โครงหน้าผู้ใช้และ CSS ของแถบเมนู | [UserLayout.jsx](frontend/src/components/layout/user/UserLayout.jsx) และ [user-layout.css](frontend/src/components/layout/user/user-layout.css) |
+| แผนที่ หมุด และรายละเอียดจุดเสี่ยง | [components/risk-cases/](frontend/src/components/risk-cases/) |
+| การโหลดข้อมูลสำรวจ | [hooks/useSurvey.js](frontend/src/hooks/useSurvey.js) |
+| สีและสไตล์พื้นฐานของเว็บ | [styles/global.css](frontend/src/styles/global.css) |
+| เส้นทาง API | [backend/internal/routes/routes.go](backend/internal/routes/routes.go) |
 
 ## เพิ่มหน้าใหม่
 
-1. คัดลอกโฟลเดอร์ของหน้าที่ยังว่าง เช่น `pages/LiveMap` แล้วเปลี่ยนชื่อ
-2. เพิ่ม 1 บรรทัดใน `frontend/src/routes/index.jsx`
-3. ส่วนย่อยที่ใช้เฉพาะหน้านั้นให้ไว้ใน `pages/<ชื่อหน้า>/components/`
+1. สร้าง `pages/<ชื่อหน้า>/<ชื่อหน้า>Page.jsx` และให้ `index.js` ในโฟลเดอร์นั้น export ตัวหน้า
+2. ลงทะเบียน URL และคอมโพเนนต์หน้าใน `frontend/src/routes/index.jsx` เลือก Layout และสิทธิ์ให้เหมาะกับหน้า
+3. เก็บ CSS และส่วนย่อยเฉพาะหน้าไว้กับหน้า เช่น `pages/MyVideos/components/VideoUpload.jsx`
+4. ส่วนที่หลายหน้าใช้ให้ import จาก `src/components/` เช่น แถบผู้ใช้จาก `components/layout/user/` และแผนที่หรือรายละเอียดเคสจาก `components/risk-cases/` ส่วนการโหลดข้อมูลสำรวจใช้ `hooks/useSurvey.js`
+
+## หน้าผู้ใช้
+
+- หน้าภาพรวม (`/dashboard`) และหน้ารายการจุดเสี่ยง (`/risk-cases`) ลงทะเบียนคนละเส้นทางใน Router หลัก แต่ละหน้าเรียก `UserLayout` โดยตรงและเก็บคำค้นของตัวเอง ช่องค้นหาจะเริ่มว่างเมื่อสลับหน้า
+- ใช้ `<Link to="/risk-cases">` จาก `@/routes/router` เมื่อต้องการเปิดหน้ารายการจุดเสี่ยง ปุ่ม **ดูรายการทั้งหมด** และเมนูด้านซ้ายใช้เส้นทางนี้
+- ปุ่มอัปโหลดอยู่ในหน้า **วิดีโอของฉัน** โค้ดหน้าต่างอัปโหลดอยู่ที่ [VideoUpload.jsx](frontend/src/pages/MyVideos/components/VideoUpload.jsx)
 
 ## เพิ่ม API (backend Go)
 

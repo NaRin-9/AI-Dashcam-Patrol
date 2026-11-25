@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
+import Icon from '@/components/ui/UserIcon'
+import UserLayout from '@/components/layout/user/UserLayout'
 import { apiGet } from '@/services/api'
-import DashboardLayout, { Icon } from './DashboardLayout'
+import VideoUpload from './components/VideoUpload'
+import './my-videos.css'
 
 const statusLabels = {
   queued: 'รอประมวลผล',
@@ -38,17 +41,19 @@ export default function MyVideosPage() {
   const visible = result.videos.filter((video) => video.name.toLowerCase().includes(term))
 
   return (
-    <DashboardLayout
+    <UserLayout
       activePage="videos"
       title="วิดีโอของฉัน"
       query={query}
       onQueryChange={setQuery}
-      onVideoUploaded={refresh}
     >
       <section className="dash-panel my-videos" aria-label="สถานะวิดีโอ" aria-busy={loading}>
         <header>
           <h2>สถานะการประมวลผล</h2>
-          <button className="my-videos-refresh" type="button" onClick={refresh} disabled={loading}>อัปเดตสถานะ</button>
+          <div className="my-videos-actions">
+            <button className="my-videos-refresh" type="button" onClick={refresh} disabled={loading}>อัปเดตสถานะ</button>
+            <VideoUpload onUploaded={refresh} />
+          </div>
         </header>
         {loading && <p className="dash-empty" role="status">กำลังโหลดสถานะวิดีโอ…</p>}
         {!loading && result.error && <p className="dash-empty" role="alert">โหลดรายการวิดีโอไม่สำเร็จ กรุณาลองอัปเดตสถานะอีกครั้ง</p>}
@@ -73,6 +78,6 @@ export default function MyVideosPage() {
           ))}
         </ul>}
       </section>
-    </DashboardLayout>
+    </UserLayout>
   )
 }

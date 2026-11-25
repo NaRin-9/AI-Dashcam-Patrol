@@ -1,0 +1,51 @@
+.live-map-key-track {
+  width: 18px;
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--track-color);
+}
+
+.live-map-track {
+  stroke: var(--track-color);
+}
+
+.live-map-marker,
+.live-map-key-point {
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background-color: var(--near-color);
+}
+
+.live-map-marker.is-touching,
+.live-map-key-point.is-touching {
+  background-color: var(--touching-color);
+}
+
+.live-map-marker {
+  box-shadow: 0 1px 5px #1d243366;
+}
+
+.live-map-key-point {
+  width: 11px;
+  height: 11px;
+  border-width: 1px;
+}
+
+.live-map-canvas {
+  isolation: isolate;
+  width: 100%;
+  height: clamp(320px, 68svh, 780px);
+  border-radius: 12px;
+  background-color: #e9e7e3;
+  color: #1d2433;
+}
+
+.live-map-canvas a:focus-visible {
+  outline: 2px solid var(--purple);
+  outline-offset: -2px;
+}
+
+.live-map-status {
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+}

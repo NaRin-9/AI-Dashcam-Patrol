@@ -1,6 +1,7 @@
 import logo from '@/assets/pea-logo.png'
 import phone from '@/assets/phone.svg'
 import { Link } from '@/routes/router'
+import './welcome.css'
 
 // หน้าต้อนรับ (ก่อนเข้าสู่ระบบ) มือถือเรียงบนลงล่าง | PC แบ่งสองคอลัมน์
 export default function WelcomePage() {
