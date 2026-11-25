@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 import { uploadVideo } from '@/services/api'
-import { Link } from '@/routes/router'
 import './video-upload.css'
 
 const maxVideoBytes = 500 * 1024 * 1024
@@ -72,10 +71,10 @@ export default function VideoUpload({ onUploaded }) {
         }}
       >
         <form onSubmit={submit}>
-          <header className="video-upload-heading">
+          <div className="video-upload-heading">
             <h2 id="video-upload-title">อัปโหลดวิดีโอ</h2>
             <button type="button" className="video-upload-close" aria-label="ปิด" disabled={uploading} onClick={() => dialog.current.close()}>×</button>
-          </header>
+          </div>
           <label
             className={dragging ? 'video-upload-drop is-dragging' : 'video-upload-drop'}
             onDragOver={(event) => { event.preventDefault(); if (!uploading) setDragging(true) }}
@@ -128,10 +127,7 @@ export default function VideoUpload({ onUploaded }) {
             ))}
           </ul>}
           {items.length > 0 && pending.length === 0 ? (
-            <div className="video-upload-actions">
-              <Link to="/my-videos" onClick={() => dialog.current.close()}>ดูวิดีโอของฉัน</Link>
-              <button type="button" className="video-upload-submit" onClick={() => dialog.current.close()}>เสร็จสิ้น</button>
-            </div>
+            <button type="button" className="video-upload-submit" onClick={() => dialog.current.close()}>เสร็จสิ้น</button>
           ) : (
             <button type="submit" className="video-upload-submit" disabled={uploading || !pending.length}>
               {uploading ? 'กำลังอัปโหลด…' : 'อัปโหลดวิดีโอ'}

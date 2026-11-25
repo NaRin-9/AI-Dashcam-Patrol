@@ -43,3 +43,50 @@ func SeedSuperadmin(db *sql.DB, username, email, password string) error {
 
 	return nil
 }
+
+// SeedDemoUsers เพิ่มบัญชีทดสอบของแต่ละบทบาทโดยเก็บบัญชีที่สร้างไว้แล้ว
+func SeedDemoUsers(db *sql.DB, password string) error {
+	if len(password) < 12 {
+		return fmt.Errorf("DEMO_USERS_PASSWORD must contain at least 12 characters")
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	for _, role := range []string{"user", "admin", "superadmin"} {
+		username := "demo_" + role
+		email := username + "@example.test"
+		hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+
+		_, err = tx.Exec(
+			`INSERT INTO users (username, email, password_hash, role_id)
+			VALUES ($1, $2, $3, (SELECT id FROM roles WHERE name = $4))
+			ON CONFLICT (username) DO NOTHING`,
+			username, email, string(hash), role,
+		)
+		if err != nil {
+			return fmt.Errorf("insert %s: %w", username, err)
+		}
+
+		var matches bool
+		err = tx.QueryRow(
+			`SELECT u.email = $2 AND r.name = $3 AND u.is_active
+			FROM users u JOIN roles r ON u.role_id = r.id WHERE u.username = $1`,
+			username, email, role,
+		).Scan(&matches)
+		if err != nil {
+			return fmt.Errorf("verify %s: %w", username, err)
+		}
+		if !matches {
+			return fmt.Errorf("%s already exists with a different email, role, or active status", username)
+		}
+	}
+
+	return tx.Commit()
+}

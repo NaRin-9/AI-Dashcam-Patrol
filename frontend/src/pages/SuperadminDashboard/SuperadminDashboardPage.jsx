@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api'
-import SurveyMap, { useSurvey } from '@/pages/LiveMap/SurveyMap'
+import SurveyMap from '@/components/risk-cases/SurveyMap'
+import useSurvey from '@/hooks/useSurvey'
 import logo from '@/assets/pea-logo.png'
 import './superadmin-dashboard.css'
 

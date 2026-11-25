@@ -1,0 +1,42 @@
+.my-videos { max-width: 1050px; margin-inline: auto; }
+.my-videos-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.my-videos-refresh {
+  padding: 7px 12px;
+  border: 1px solid var(--dash-line);
+  border-radius: 8px;
+  color: var(--purple);
+  background: white;
+}
+.my-videos-refresh:disabled { opacity: .6; cursor: default; }
+.my-videos-list { margin: 0; padding: 0; list-style: none; }
+.my-videos-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  border-top: 1px solid var(--dash-line);
+}
+.my-videos-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: var(--purple);
+  background: #f5edf4;
+}
+.my-videos-file { display: grid; gap: 4px; overflow-wrap: anywhere; font-size: 1rem; }
+.my-videos-file small { color: var(--dash-muted); font-size: .875rem; }
+.my-videos-status {
+  padding: 5px 8px;
+  border-radius: 8px;
+  background: #f2eff3;
+  color: #514556;
+  font-size: .875rem;
+  text-align: center;
+}
+.my-videos-status[data-status="queued"] { background: #fcf0d7; color: #7d5004; }
+.my-videos-status[data-status="processing"] { background: #ede7f7; color: #4d2b86; }
+.my-videos-status[data-status="processed"] { background: #e1f3ea; color: #176447; }
+.my-videos-status[data-status="failed"] { background: #fae7ea; color: #9c2134; }

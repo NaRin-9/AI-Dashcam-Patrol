@@ -26,64 +26,69 @@ frontend (`npm run dev`) ส่งคำขอ `/api/...` มาที่พอ�
 
 ใช้ `go fmt ./...` เพื่อจัดรูปแบบโค้ด และ `go build -o bin/server ./cmd/server` เพื่อสร้างไฟล์โปรแกรม
 
-## โครงสร้าง
+### บัญชีทดสอบสำหรับเครื่องพัฒนา
 
-```
-backend/
-├─ cmd/server/main.go        จุดเริ่ม: อ่านค่าตั้งค่า แล้วเปิดเซิร์ฟเวอร์
-├─ internal/
-│  ├─ routes/
-│  │  ├─ routes.go           รายการ API ทั้งหมด: method + path → controller
-│  │  └─ middleware.go       logger และ CORS ที่ทุกคำขอผ่าน
-│  ├─ controllers/           รับคำขอ HTTP → เรียก service → ส่ง JSON กลับ
-│  │  ├─ health.go           GET /api/health
-│  │  ├─ riskreports.go      GET /api/risk-reports
-│  │  ├─ livemap.go          GET /api/live-map
-│  │  └─ respond.go          ฟังก์ชันส่ง JSON และ error
-│  ├─ services/              logic ของระบบ
-│  │  └─ riskreports.go
-│  └─ entities/              รูปแบบข้อมูลของระบบ
-│     └─ entities.go         RiskSpan, Track, LiveMap
-├─ .env.example              PORT, ALLOWED_ORIGIN, FRONTEND_DIR
-└─ go.mod
+เปิด PostgreSQL ให้พร้อม แล้วรันจากโฟลเดอร์ `backend`
+
+```bash
+go run ./cmd/server -seed-demo-users
 ```
 
-## แต่ละส่วนทำหน้าที่อะไร
+คำสั่งนี้ใช้กับ PostgreSQL ในเครื่อง และจะจบหลังสร้างบัญชี ให้เปิด Backend ตามปกติแล้วล็อกอินด้วยชื่อบัญชีในตาราง
 
-| ส่วน | หน้าที่ | ไม่ควรทำ |
-|---|---|---|
-| `routes` | ประตูทางเข้า บอกว่า URL ไหนไปหา controller ตัวไหน และให้ทุกคำขอผ่าน logger กับ CORS | ไม่มี logic |
-| `controllers` | คุยกับ HTTP: อ่านค่าจาก URL หรือ body ตรวจความถูกต้อง เรียก service แล้วส่ง JSON และรหัสสถานะ (200, 400, 500) กลับ | ไม่คำนวณ ไม่ต่อฐานข้อมูลเอง |
-| `services` | สมองของระบบ: ดึงข้อมูล คำนวณ จัดลำดับความเสี่ยง และ (เมื่อมีฐานข้อมูล) อ่านเขียนฐานข้อมูล | ไม่รู้จัก HTTP |
-| `entities` | นิยามหน้าตาข้อมูล เช่น span มีรหัสเสา ระดับความเสี่ยง คะแนน ใช้ร่วมกันทุกชั้น และเป็นรูปแบบ JSON ที่ frontend ได้รับ | ไม่มี logic |
-| `cmd/server` | เปิดโปรแกรม อ่านค่าตั้งค่า แล้วเริ่มเซิร์ฟเวอร์ | – |
+| ชื่อบัญชี | บทบาท |
+|---|---|
+| `demo_user` | User |
+| `demo_admin` | Admin |
+| `demo_superadmin` | Superadmin |
 
-ลำดับเมื่อมีคำขอเข้ามา:
+บัญชีใหม่ทั้งสามใช้รหัสผ่านทดสอบ `Dashcam1234!` หากต้องการใช้รหัสอื่น ให้ตั้ง `DEMO_USERS_PASSWORD` ใน `backend/.env` ให้มีอย่างน้อย 12 ตัวอักษรก่อนรัน การรันซ้ำจะเก็บบัญชีและรหัสผ่านเดิมไว้
 
-```
-frontend → routes → controller → service → (ฐานข้อมูล)
-                         ↑            ↓
-                     entities ← ข้อมูลที่ได้
-```
+## จะแก้เรื่องไหน เปิดไฟล์ไหนดี
 
-ตัวอย่าง: frontend เรียก `GET /api/risk-reports`
-1. `routes` ส่งไปที่ `controllers.ListRiskReports`
-2. controller เรียก `services.ListRiskSpans`
-3. service คืนรายการ `entities.RiskSpan` (ตอนนี้ยังว่าง)
-4. controller แปลงเป็น JSON `{"items": [...]}` ส่งกลับ
+พาธในตารางนับจากโฟลเดอร์ `backend/`
 
-## API ตอนนี้
+| เรื่อง | เริ่มจากไฟล์นี้ |
+|---|---|
+| เปิดเซิร์ฟเวอร์ เชื่อมฐานข้อมูล หรือเรียก seed | [cmd/server/main.go](cmd/server/main.go) |
+| ค่าตั้งต้นของระบบและตัวแปรแวดล้อม | [internal/config/config.go](internal/config/config.go) และ [.env.example](.env.example) |
+| เพิ่ม URL ของ API หรือแก้ CORS | [internal/routes/routes.go](internal/routes/routes.go) |
+| ตรวจโทเคนและบทบาทผู้ใช้ | [internal/middleware/auth.go](internal/middleware/auth.go) |
+| รับคำขอ HTTP และส่งผลกลับ | [internal/controllers/](internal/controllers/) |
+| กฎการทำงานและการอ่านเขียนข้อมูล เช่น บัญชีผู้ใช้และแผนก | [internal/services/](internal/services/) |
+| โครงสร้างข้อมูล เช่น ผู้ใช้ จุดเสี่ยง หรือวิดีโอ | [internal/entities/](internal/entities/) แยกโฟลเดอร์ตามชนิดข้อมูล |
+| สร้างหรืออัปเดตตาราง รวมถึงข้อมูลเริ่มต้นของบทบาทและแผนก | [internal/database/database.go](internal/database/database.go) |
+| สร้างบัญชี Superadmin เริ่มต้นหรือบัญชีทดสอบ | [internal/database/seed.go](internal/database/seed.go) |
+| เสิร์ฟหน้าเว็บเมื่อกำหนด `FRONTEND_DIR` | [internal/routes/frontend.go](internal/routes/frontend.go) |
 
-| Method | Path | ใช้กับหน้า | สถานะ |
+ตัวอย่าง ถ้าจะแก้ API รายชื่อแผนก ให้เริ่มจาก `GET /api/departments` ใน `routes.go` เส้นทางนี้เรียก `DepartmentController.List` ใน `controllers/department.go` แล้วไปอ่านฐานข้อมูลผ่าน `DepartmentService.List` ใน `services/department.go`
+
+ส่วนวิดีโอให้เริ่มที่ [controllers/video_uploads.go](internal/controllers/video_uploads.go) ตอนนี้ไฟล์นี้รับคำขอ ตรวจไฟล์ บันทึกลงดิสก์ และอ่านเขียนตาราง `video_uploads` โดยตรง ที่เก็บไฟล์ปรับได้ด้วย `VIDEO_UPLOAD_DIR`
+
+## API ที่ใช้บ่อย
+
+| Method | Path | ทำอะไร | สิทธิ์ |
 |---|---|---|---|
-| GET | `/api/health` | – | ใช้ได้ |
-| GET | `/api/risk-reports` | RiskReports | คืนรายการว่าง รอฐานข้อมูล |
-| GET | `/api/live-map` | LiveMap | ต้องล็อกอิน ผู้ใช้ทั่วไปเห็นหมุด ส่วน Admin และ Superadmin เห็นเส้นทางรถด้วย |
+| GET | `/api/health` | เช็กว่า Backend ตอบได้ | เปิดทั่วไป |
+| POST | `/api/auth/login` | เข้าสู่ระบบ | เปิดทั่วไป |
+| GET | `/api/departments` | ดูรายชื่อแผนก | ล็อกอิน |
+| GET | `/api/live-map` | คืนหมุดจำลอง ส่วน Admin และ Superadmin ได้เส้นทางรถจำลองด้วย | ล็อกอิน |
+| GET | `/api/risk-reports` | รายงานช่วงเสาที่มีความเสี่ยง ตอนนี้คืนรายการว่าง | ล็อกอิน |
+| GET | `/api/videos` | ดูรายการวิดีโอของบัญชีที่ล็อกอิน | ล็อกอิน |
+| POST | `/api/videos` | อัปโหลด MP4 หรือ MOV แล้วบันทึกสถานะเริ่มต้นเป็น `queued` | ล็อกอิน |
+| GET | `/api/admin/users` | ดูรายการบัญชีผู้ใช้ | Admin และ Superadmin |
 
-## เพิ่ม endpoint ใหม่
+ดูเส้นทางทั้งหมดได้ที่ [routes.go](internal/routes/routes.go)
 
-1. ถ้ามีข้อมูลรูปแบบใหม่ เพิ่ม struct ใน `internal/entities`
-2. เขียน logic ใน `internal/services/<เรื่อง>.go`
-3. เขียน controller ใน `internal/controllers/<เรื่อง>.go`
-4. เพิ่ม 1 บรรทัดใน `internal/routes/routes.go` เช่น `mux.HandleFunc("GET /api/spans/{id}", controllers.GetSpan)`
-5. ฝั่ง frontend เรียกผ่าน `apiGet('/spans/123')` ใน `src/services/api.js`
+## เพิ่ม API ใหม่
+
+1. เขียนส่วนรับคำขอและส่งผลตอบกลับใน `internal/controllers/` ถ้ามีกฎการทำงานหรือการอ่านเขียนข้อมูล ให้เพิ่มใน Service ของเรื่องนั้น
+2. ถ้าต้องเพิ่มรูปแบบข้อมูล ให้สร้าง struct ในแพ็กเกจของเรื่องนั้นใต้ `internal/entities/`
+3. ลงทะเบียนใน `internal/routes/routes.go` โดยเลือกกลุ่มตามสิทธิ์ `api` สำหรับ API สาธารณะ, `authenticated` สำหรับคนที่ล็อกอิน และ `admin` สำหรับ Admin กับ Superadmin ตัวอย่างที่ใช้อยู่
+
+   ```go
+   authenticated.GET("/departments/:id", deps.DepartmentController.Get)
+   ```
+
+   เส้นทางเต็มคือ `GET /api/departments/:id`
+4. รัน `go fmt ./...` และ `go test ./...` จากโฟลเดอร์ `backend` ก่อนเปิด Pull Request

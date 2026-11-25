@@ -3,6 +3,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -20,7 +21,12 @@ import (
 	"ai-dashcam-patrol/backend/internal/services"
 )
 
+const defaultDemoUsersPassword = "Dashcam1234!"
+
 func main() {
+	seedDemoUsers := flag.Bool("seed-demo-users", false, "seed local test accounts and exit")
+	flag.Parse()
+
 	if err := loadEnv(); err != nil {
 		log.Fatalf("failed to load environment: %v", err)
 	}
@@ -29,6 +35,19 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("failed to load configuration: %v", err)
+	}
+
+	demoPassword := os.Getenv("DEMO_USERS_PASSWORD")
+	if *seedDemoUsers {
+		if host := cfg.DBHost; host != "localhost" && host != "127.0.0.1" && host != "::1" {
+			log.Fatal("seed-demo-users requires a local database")
+		}
+		if demoPassword == "" {
+			demoPassword = defaultDemoUsersPassword
+		}
+		if len(demoPassword) < 12 {
+			log.Fatal("set DEMO_USERS_PASSWORD to at least 12 characters")
+		}
 	}
 
 	// เชื่อมต่อฐานข้อมูล PostgreSQL
@@ -41,6 +60,14 @@ func main() {
 	// รัน database migration
 	if err := database.Migrate(db); err != nil {
 		log.Fatalf("failed to run database migration: %v", err)
+	}
+
+	if *seedDemoUsers {
+		if err := database.SeedDemoUsers(db, demoPassword); err != nil {
+			log.Fatalf("failed to seed demo users: %v", err)
+		}
+		log.Println("demo_user, demo_admin and demo_superadmin are ready")
+		return
 	}
 
 	if password := os.Getenv("SUPERADMIN_PASSWORD"); password != "" {

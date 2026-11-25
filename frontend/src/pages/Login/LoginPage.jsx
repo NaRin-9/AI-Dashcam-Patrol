@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
-import AuthShell from '@/components/ui/AuthShell'
-import TextField, { PasswordField } from '@/components/ui/TextField'
-import LoadingOverlay from '@/components/ui/LoadingOverlay'
+import LoadingOverlay from './components/LoadingOverlay'
 import { Link, useNavigate } from '@/routes/router'
 import { useAuth } from '@/contexts/AuthContext'
 import logo from '@/assets/pea-logo.png'
 import phone from '@/assets/phone.svg'
+import './login.css'
 
 export default function LoginPage() {
   const navigate = useNavigate()
