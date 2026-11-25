@@ -76,10 +76,8 @@ func Setup(deps Dependencies) *gin.Engine {
 				admin.PUT("/users/:id/role", deps.UserController.AdminChangeRole)
 				admin.DELETE("/users/:id", deps.UserController.AdminDeleteUser)
 
-				// Department management for admin/superadmin
+				// Department management for admin/superadmin (write operations & aliases)
 				if deps.DepartmentController != nil {
-					admin.GET("/departments", deps.DepartmentController.List)
-					admin.GET("/departments/:id", deps.DepartmentController.Get)
 					admin.POST("/departments", deps.DepartmentController.Create)
 					admin.PUT("/departments/:id", deps.DepartmentController.Update)
 					admin.DELETE("/departments/:id", deps.DepartmentController.Delete)
