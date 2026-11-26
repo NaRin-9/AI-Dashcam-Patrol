@@ -29,9 +29,9 @@
 | งาน | เริ่มจากไฟล์ |
 |---|---|
 | URL ของหน้า สิทธิ์การเข้าถึง และเมนูหลัก | [routes/index.jsx](frontend/src/routes/index.jsx) |
-| เมนูด้านซ้ายและลิงก์ระหว่างหน้าผู้ใช้ | [UserSidebar.jsx](frontend/src/components/layout/user/UserSidebar.jsx) |
-| หัวข้อหน้า ช่องค้นหา และเมนูบัญชี | [UserTopBar.jsx](frontend/src/components/layout/user/UserTopBar.jsx) |
-| โครงหน้าผู้ใช้และ CSS ของแถบเมนู | [UserLayout.jsx](frontend/src/components/layout/user/UserLayout.jsx) และ [user-layout.css](frontend/src/components/layout/user/user-layout.css) |
+| เมนูด้านซ้ายและรายการเมนูของแต่ละบทบาท | [DashboardSidebar.jsx](frontend/src/components/layout/dashboard/DashboardSidebar.jsx) |
+| หัวข้อหน้า ช่องค้นหา และเมนูบัญชี | [DashboardTopBar.jsx](frontend/src/components/layout/dashboard/DashboardTopBar.jsx) |
+| โครงหน้าปฏิบัติงานของ User, Admin และ Super Admin | [DashboardLayout.jsx](frontend/src/components/layout/dashboard/DashboardLayout.jsx) และ [dashboard-layout.css](frontend/src/components/layout/dashboard/dashboard-layout.css) |
 | แผนที่ หมุด และรายละเอียดจุดเสี่ยง | [components/risk-cases/](frontend/src/components/risk-cases/) |
 | การโหลดข้อมูลสำรวจ | [hooks/useSurvey.js](frontend/src/hooks/useSurvey.js) |
 | สีและสไตล์พื้นฐานของเว็บ | [styles/global.css](frontend/src/styles/global.css) |
@@ -42,11 +42,11 @@
 1. สร้าง `pages/<ชื่อหน้า>/<ชื่อหน้า>Page.jsx` และให้ `index.js` ในโฟลเดอร์นั้น export ตัวหน้า
 2. ลงทะเบียน URL และคอมโพเนนต์หน้าใน `frontend/src/routes/index.jsx` เลือก Layout และสิทธิ์ให้เหมาะกับหน้า
 3. เก็บ CSS และส่วนย่อยเฉพาะหน้าไว้กับหน้า เช่น `pages/MyVideos/components/VideoUpload.jsx`
-4. ส่วนที่หลายหน้าใช้ให้ import จาก `src/components/` เช่น แถบผู้ใช้จาก `components/layout/user/` และแผนที่หรือรายละเอียดเคสจาก `components/risk-cases/` ส่วนการโหลดข้อมูลสำรวจใช้ `hooks/useSurvey.js`
+4. ส่วนที่หลายหน้าใช้ให้ import จาก `src/components/` เช่น Layout ของหน้าปฏิบัติงานจาก `components/layout/dashboard/` และแผนที่หรือรายละเอียดเคสจาก `components/risk-cases/` ส่วนการโหลดข้อมูลสำรวจใช้ `hooks/useSurvey.js`
 
 ## หน้าผู้ใช้
 
-- หน้าภาพรวม (`/dashboard`) และหน้ารายการจุดเสี่ยง (`/risk-cases`) ลงทะเบียนคนละเส้นทางใน Router หลัก แต่ละหน้าเรียก `UserLayout` โดยตรงและเก็บคำค้นของตัวเอง ช่องค้นหาจะเริ่มว่างเมื่อสลับหน้า
+- หน้าภาพรวม (`/dashboard`) และหน้ารายการจุดเสี่ยง (`/risk-cases`) ลงทะเบียนคนละเส้นทางใน Router หลัก แต่ละหน้าเรียก `DashboardLayout` โดยตรงและเก็บคำค้นของตัวเอง ช่องค้นหาจะเริ่มว่างเมื่อสลับหน้า
 - ใช้ `<Link to="/risk-cases">` จาก `@/routes/router` เมื่อต้องการเปิดหน้ารายการจุดเสี่ยง ปุ่ม **ดูรายการทั้งหมด** และเมนูด้านซ้ายใช้เส้นทางนี้
 - ปุ่มอัปโหลดอยู่ในหน้า **วิดีโอของฉัน** โค้ดหน้าต่างอัปโหลดอยู่ที่ [VideoUpload.jsx](frontend/src/pages/MyVideos/components/VideoUpload.jsx)
 

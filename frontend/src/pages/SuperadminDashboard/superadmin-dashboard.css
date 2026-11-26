@@ -1,11 +1,8 @@
 /* Superadmin Dashboard CSS - Matching User Mockup */
 :root {
   --sa-purple: #741270;
-  --sa-purple-dark: #580c55;
   --sa-purple-light: #911b8c;
   --sa-purple-soft: #fbf3fa;
-  --sa-bg: #f3f4f6;
-  --sa-card-bg: #ffffff;
   --sa-border: #e5e7eb;
   --sa-text: #1f2937;
   --sa-text-muted: #6b7280;
@@ -14,294 +11,8 @@
   --sa-done: #10b981;
 }
 
-.superadmin-container {
-  display: flex;
-  min-height: 100vh;
-  background-color: var(--sa-bg);
-  color: var(--sa-text);
-  font-family: 'Prompt', 'Kanit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  overflow-x: hidden;
-  position: relative;
-}
-
-/* ================= Sidebar ================= */
-.superadmin-sidebar {
-  background: linear-gradient(180deg, var(--sa-purple) 0%, var(--sa-purple-dark) 100%);
-  color: #ffffff;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 40;
-  box-shadow: 4px 0 16px rgba(116, 18, 112, 0.15);
-  flex-shrink: 0;
-}
-
-.superadmin-sidebar.expanded {
-  width: 250px;
-}
-
-.superadmin-sidebar.collapsed {
-  width: 76px;
-}
-
-/* Curved Notch / Toggle Button */
-.superadmin-toggle-notch {
-  position: absolute;
-  top: 100px;
-  right: -24px;
-  width: 24px;
-  height: 52px;
-  background: var(--sa-purple);
-  border-radius: 0 16px 16px 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  color: #ffffff;
-  padding: 0;
-  box-shadow: 3px 0 8px rgba(0, 0, 0, 0.12);
-  z-index: 50;
-  transition: background 0.2s, transform 0.2s;
-}
-
-.superadmin-toggle-notch:hover {
-  background: var(--sa-purple-light);
-  transform: scale(1.05);
-}
-
-.superadmin-toggle-notch svg {
-  transition: transform 0.3s ease;
-}
-
-.superadmin-sidebar-header {
-  padding: 24px 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.superadmin-sidebar-logo {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-
-.superadmin-sidebar-title {
-  display: flex;
-  flex-direction: column;
-  transition: opacity 0.2s;
-}
-
-.superadmin-sidebar-title strong {
-  font-size: 1rem;
-  letter-spacing: 0.5px;
-  color: #fff;
-}
-
-.superadmin-sidebar-title span {
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.superadmin-nav {
-  padding: 20px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.superadmin-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 14px;
-  color: rgba(255, 255, 255, 0.85);
-  border-radius: 12px;
-  text-decoration: none;
-  font-size: 0.92rem;
-  font-weight: 500;
-  transition: all 0.2s;
-  background: transparent;
-  border: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.superadmin-nav-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.superadmin-nav-item.active {
-  background: #ffffff;
-  color: var(--sa-purple);
-  font-weight: 700;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.superadmin-nav-item svg {
-  flex-shrink: 0;
-}
-
-.superadmin-sidebar-footer {
-  padding: 16px 10px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-/* ================= Main Area ================= */
-.superadmin-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-/* Header */
-.superadmin-header {
-  background: #ffffff;
-  padding: 16px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  border-bottom: 1px solid var(--sa-border);
-  position: sticky;
-  top: 0;
-  z-index: 30;
-}
-
-/* Search Bar (Pill shape matching mockup) */
-.superadmin-search-bar {
-  flex: 1;
-  max-width: 580px;
-  position: relative;
-}
-
-.superadmin-search-bar input {
-  width: 100%;
-  height: 44px;
-  padding: 8px 16px 8px 46px;
-  background: #e9ecef;
-  border: 1px solid transparent;
-  border-radius: 24px;
-  font-size: 0.92rem;
-  color: var(--sa-text);
-  outline: none;
-  transition: all 0.2s;
-}
-
-.superadmin-search-bar input:focus {
-  background: #ffffff;
-  border-color: var(--sa-purple);
-  box-shadow: 0 0 0 3px rgba(116, 18, 112, 0.15);
-}
-
-.superadmin-search-bar svg {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #8c95a0;
-}
-
-/* Header User & Alerts */
-.superadmin-header-right {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.superadmin-user-profile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.superadmin-user-info {
-  display: flex;
-  flex-direction: column;
-  text-align: right;
-}
-
-.superadmin-user-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--sa-text);
-}
-
-.superadmin-user-role {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--sa-purple);
-  background: var(--sa-purple-soft);
-  padding: 2px 8px;
-  border-radius: 10px;
-  display: inline-block;
-  margin-top: 2px;
-}
-
-.superadmin-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--sa-purple-light), var(--sa-purple));
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  box-shadow: 0 2px 8px rgba(116, 18, 112, 0.25);
-}
-
-.superadmin-bell-btn {
-  position: relative;
-  background: #f3f4f6;
-  border: none;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #4b5563;
-  transition: all 0.2s;
-}
-
-.superadmin-bell-btn:hover {
-  background: #e5e7eb;
-  color: var(--sa-purple);
-}
-
-.superadmin-bell-badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 10px;
-  height: 10px;
-  background: var(--sa-pending);
-  border-radius: 50%;
-  border: 2px solid #ffffff;
-}
-
 /* ================= Dashboard Content ================= */
 .superadmin-body {
-  padding: 24px 32px 40px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -521,22 +232,6 @@
   border-color: #a7f3d0;
 }
 
-.superadmin-alerts-search {
-  padding: 12px 18px;
-  border-bottom: 1px solid var(--sa-border);
-  background: #fafafa;
-}
-
-.superadmin-alerts-search input {
-  width: 100%;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--sa-border);
-  background: #ffffff;
-  font-size: 0.85rem;
-  outline: none;
-}
-
 .superadmin-alerts-list {
   flex: 1;
   overflow-y: auto;
@@ -678,19 +373,6 @@
   flex-wrap: wrap;
 }
 
-.superadmin-table-search {
-  flex: 1;
-  max-width: 320px;
-}
-
-.superadmin-table-search input {
-  width: 100%;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--sa-border);
-  font-size: 0.88rem;
-}
-
 .superadmin-role-filter-pills {
   display: flex;
   gap: 6px;
@@ -784,11 +466,13 @@
 
 .superadmin-modal {
   background: #ffffff;
+  color: var(--sa-text);
   border-radius: 18px;
   width: 100%;
   max-width: 480px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-  overflow: hidden;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
   animation: modalIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

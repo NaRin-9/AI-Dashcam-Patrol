@@ -6,6 +6,8 @@ import UserIcon from '@/components/ui/UserIcon'
 const searchLabels = {
   cases: 'ค้นหารหัสเคสหรือรหัสเสาไฟ',
   videos: 'ค้นหาชื่อไฟล์วิดีโอ',
+  superadmin: 'ค้นหารหัสเคส รหัสเสาไฟ หรือรายละเอียด',
+  'superadmin-users': 'ค้นหาชื่อ อีเมล หรือแผนก',
 }
 
 function AccountMenu() {
@@ -27,7 +29,7 @@ function AccountMenu() {
         <small>{department}</small>
         {displayName !== user.username && <small>ชื่อผู้ใช้ {user.username}</small>}
         <small>{user.email}</small>
-        <small>{user.role} · {user.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</small>
+        <small>{user.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</small>
         {user.createdAt && <small>สมัครเมื่อ {new Date(user.createdAt).toLocaleDateString('th-TH')}</small>}
         <Link to="/risk-reports">รายงานจุดเสี่ยง</Link>
         {isAdminOrAbove && <Link to="/admin">หน้าผู้ดูแลระบบ</Link>}
@@ -39,9 +41,10 @@ function AccountMenu() {
   )
 }
 
-export default function UserTopBar({ activePage, title, query, onQueryChange, searchAction }) {
+export default function DashboardTopBar({ activePage, title, query, onQueryChange, searchAction }) {
   const searchLabel = searchLabels[activePage] ?? 'ค้นหารหัสจุดเสี่ยง'
   const isMap = activePage === 'map'
+  const hasSearch = Boolean(onQueryChange)
   const [searchExpanded, setSearchExpanded] = useState(false)
   const searchId = useId()
   const inputRef = useRef(null)
@@ -52,14 +55,14 @@ export default function UserTopBar({ activePage, title, query, onQueryChange, se
   }, [searchExpanded])
 
   return (
-    <header className="dash-top">
+    <header className="dash-top" data-search={hasSearch}>
       {activePage !== 'overview' && (
         <Link className="dash-map-back" to="/dashboard" aria-label="กลับหน้าภาพรวม">
           <UserIcon name="back" size={22} />
         </Link>
       )}
       <h1>{title}</h1>
-      <div className="dash-search" id={searchId} data-expanded={searchExpanded}>
+      {hasSearch && <div className="dash-search" id={searchId} data-expanded={searchExpanded}>
         <label>
           <UserIcon name="search" />
           <input
@@ -78,7 +81,7 @@ export default function UserTopBar({ activePage, title, query, onQueryChange, se
           />
         </label>
         {searchAction}
-      </div>
+      </div>}
       <div className="dash-top-actions">
         {isMap && (
           <button

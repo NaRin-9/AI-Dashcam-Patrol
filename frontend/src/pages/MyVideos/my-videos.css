@@ -53,7 +53,7 @@
     color: var(--purple-dark);
   }
   [data-page="videos"] .dash-content {
-    padding: 12px 12px calc(var(--dash-mobile-nav-height) + 12px);
+    padding: 12px;
   }
   .my-videos { padding: 0; border: 0; }
   .my-videos > header { align-items: start; gap: 8px; margin-bottom: 12px; }

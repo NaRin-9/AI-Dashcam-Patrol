@@ -201,7 +201,7 @@
   [data-page="overview"] .dash-search:focus-within,
   [data-page="overview"] .dash-account summary:focus-visible { outline-color: #fff; }
 
-  [data-page="overview"] .dash-content { padding: 14px 10px calc(var(--dash-mobile-nav-height) + 12px); }
+  [data-page="overview"] .dash-content { padding: 14px 10px 12px; }
 
   .dash-stats {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

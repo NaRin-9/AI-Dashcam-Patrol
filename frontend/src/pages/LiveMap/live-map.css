@@ -4,11 +4,9 @@
 
 @media (max-width: 760px) {
   .patrol-dashboard[data-page="map"] { --dash-background: #fff; }
-  [data-page="map"] .dash-main {
+  [data-page="map"] .dash-scroll {
     display: flex;
     flex-direction: column;
-    min-height: 100svh;
-    padding-bottom: var(--dash-mobile-nav-height);
   }
   [data-page="map"] .dash-top {
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
