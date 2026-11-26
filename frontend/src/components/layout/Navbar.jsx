@@ -12,7 +12,7 @@ export default function Navbar() {
 
   return (
     <header className="nav">
-      <Link className="brand" to="/">
+      <Link className="brand" to={isAuthenticated ? '/dashboard' : '/'}>
         <img className="logo" src={logo} alt="การไฟฟ้าส่วนภูมิภาค" />
         <span className="brand-name">ตรวจจับความเสี่ยง ก่อนเกิดปัญหา</span>
       </Link>

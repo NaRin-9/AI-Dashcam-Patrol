@@ -18,20 +18,20 @@ import SuperadminDashboardPage from '@/pages/SuperadminDashboard'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
 export const routes = [
-  { path: '/', label: 'Home', element: <HomePage />, phoneElement: <WelcomePage />, showInNav: true },
-  {
-    path: '/live-map',
-    label: 'Live Map',
-    bare: true,
-    element: (
-      <ProtectedRoute>
-        <LiveMapPage />
-      </ProtectedRoute>
-    ),
-    showInNav: true,
-  },
-  { path: '/risk-reports', label: 'Risk Reports', element: <RiskReportsPage />, showInNav: true },
-  { path: '/how-it-works', label: 'How it Works', element: <HowItWorksPage />, showInNav: true },
+  { path: '/', label: 'Log In', element: <LoginPage />, showInNav: false, bare: true },
+  // {
+  //   path: '/live-map',
+  //   label: 'Live Map',
+  //   bare: true,
+  //   element: (
+  //     <ProtectedRoute>
+  //       <LiveMapPage />
+  //     </ProtectedRoute>
+  //   ),
+  //   showInNav: true,
+  // },
+  // { path: '/risk-reports', label: 'Risk Reports', element: <RiskReportsPage />, showInNav: true },
+  // { path: '/how-it-works', label: 'How it Works', element: <HowItWorksPage />, showInNav: true },
 
   // Dashboard routes พร้อม Role-based route protection
   {
@@ -87,7 +87,7 @@ export const routes = [
   },
 
   // Auth pages (bare: เต็มจอ ไม่มี navbar)
-  { path: '/welcome', label: 'Welcome', element: <WelcomePage />, showInNav: false, bare: true },
+  // { path: '/welcome', label: 'Welcome', element: <WelcomePage />, showInNav: false, bare: true },
   { path: '/login', label: 'Log In', element: <LoginPage />, showInNav: false, bare: true },
   { path: '/register', label: 'Register', element: <RegisterPage />, showInNav: false, bare: true },
   { path: '/reset-password', label: 'Reset Password', element: <ResetPasswordPage />, showInNav: false, bare: true },
