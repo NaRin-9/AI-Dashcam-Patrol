@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import { useAuth } from '@/contexts/AuthContext'
-import { useSearchParams } from '@/routes/router'
+import { Link, useSearchParams } from '@/routes/router'
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api'
 import SurveyMap from '@/components/risk-cases/SurveyMap'
 import useSurvey from '@/hooks/useSurvey'
@@ -484,12 +484,12 @@ export default function SuperadminDashboardPage() {
                       </svg>
                       แสดงแผนที่ (Survey Map)
                     </h2>
-                    <a
-                      href="/#/live-map"
+                    <Link
+                      to="/live-map"
                       style={{ fontSize: '0.85rem', color: 'var(--sa-purple)', fontWeight: 600, textDecoration: 'none' }}
                     >
                       ขยายเต็มจอ ↗
-                    </a>
+                    </Link>
                   </div>
                   <div className="superadmin-map-container">
                     <SurveyMap data={mapData} selection={mapSelection} />

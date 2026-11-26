@@ -16,24 +16,20 @@ src/
 ├─ app/
 │  └─ App.jsx      ตั้ง <Routes> จากรายการใน routes/index.jsx
 ├─ routes/
-│  ├─ index.jsx    รายการหน้าทั้งหมดและเมนู (เพิ่มหน้าใหม่ที่นี่)
-│  └─ router.jsx   ตัวห่อ react-router-dom (BrowserRouter, Link, usePath)
+│  ├─ index.jsx    รายการหน้าและสิทธิ์การเข้าถึง
+│  └─ router.jsx   ตัวห่อ react-router-dom (BrowserRouter, Link, Navigate)
 ├─ pages/          1 โฟลเดอร์ = 1 หน้า
-│  ├─ Home/        HomePage.jsx + components/Hero.jsx
 │  ├─ Dashboard/   ภาพรวมและส่วนย่อยใน components/
 │  ├─ RiskCases/   รายการจุดเสี่ยง (/risk-cases)
 │  ├─ MyVideos/    รายการวิดีโอและ components/VideoUpload.jsx
 │  ├─ LiveMap/
-│  ├─ RiskReports/
-│  ├─ HowItWorks/
 │  ├─ Welcome/     หน้าต้อนรับ (/welcome)
 │  ├─ Login/
-│  ├─ ResetPassword/
-│  └─ NotFound/
+│  └─ ResetPassword/
 ├─ components/     ส่วนประกอบที่ใช้หลายหน้า
-│  ├─ layout/      Layout.jsx, Navbar.jsx และแถบผู้ใช้ใน user/
+│  ├─ layout/dashboard/ โครงหน้าปฏิบัติงานทุกบทบาท
 │  ├─ risk-cases/  แผนที่ สัญลักษณ์ และรายละเอียดเคสที่ใช้ข้ามหน้า
-│  └─ ui/          PagePlaceholder, AuthShell, TextField (ฟอร์ม)
+│  └─ ui/          AuthShell, TextField (ฟอร์ม)
 ├─ services/       api.js จุดเดียวที่เรียก backend
 ├─ hooks/          custom hooks ที่ใช้ร่วมกัน
 ├─ utils/          ฟังก์ชันช่วยทั่วไป
@@ -44,11 +40,9 @@ public/            ไฟล์ที่ใช้ตรงๆ เช่น favic
 
 ดูรายการโฟลเดอร์ของทุกหน้าและ URL ใน [คู่มือทีม](../CONTRIBUTING.md)
 
-หน้าแรก `/` บนมือถือ (กว้างไม่เกิน 760px) แสดงหน้า Welcome แทน Hero ผ่าน `phoneElement` ใน routes
+เมื่อเปิด `/` บน PC ระบบจะพาไป `/login` หากล็อกอินอยู่แล้ว ระบบจะพาไปหน้าปฏิบัติงานตามบทบาท ส่วนบนมือถือ (กว้างไม่เกิน 760px) จะแสดงหน้า Welcome ผ่าน `phoneElement` ใน routes
 
-route ที่ใส่ `bare: true` จะแสดงเต็มจอโดยไม่มี Navbar
-
-หน้าที่ยังไม่มีเนื้อหาแสดง `PagePlaceholder` ไว้ก่อน ลบออกเมื่อเริ่มทำหน้านั้น
+URL ที่ไม่ได้ลงทะเบียนจะกลับไปที่ `/`
 
 ## เชื่อม backend
 

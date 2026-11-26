@@ -31,7 +31,6 @@ function AccountMenu() {
         <small>{user.email}</small>
         <small>{user.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</small>
         {user.createdAt && <small>สมัครเมื่อ {new Date(user.createdAt).toLocaleDateString('th-TH')}</small>}
-        <Link to="/risk-reports">รายงานจุดเสี่ยง</Link>
         {isAdminOrAbove && <Link to="/admin">หน้าผู้ดูแลระบบ</Link>}
         {isSuperadmin && <Link to="/superadmin">หน้าผู้ดูแลระบบสูงสุด</Link>}
         <button onClick={logout}>ออกจากระบบ</button>

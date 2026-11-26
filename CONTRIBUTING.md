@@ -7,20 +7,18 @@
 
 | หน้า | โฟลเดอร์ | URL | ผู้รับผิดชอบ |
 |---|---|---|---|
-| หน้าแรก | `pages/Home` | `/` | |
 | ต้อนรับ | `pages/Welcome` | `/welcome` และ `/` บนมือถือ | |
 | ภาพรวมผู้ใช้ | `pages/Dashboard` | `/dashboard` | |
 | แผนที่ | `pages/LiveMap` | `/live-map` | |
 | รายการจุดเสี่ยง | `pages/RiskCases` | `/risk-cases` | |
 | วิดีโอของฉัน | `pages/MyVideos` | `/my-videos` | |
-| รายงานความเสี่ยง | `pages/RiskReports` | `/risk-reports` | |
-| วิธีการทำงาน | `pages/HowItWorks` | `/how-it-works` | |
-| เข้าสู่ระบบ | `pages/Login` | `/login` | |
+| เข้าสู่ระบบ | `pages/Login` | `/login` และปลายทางของ `/` บน PC | |
 | สมัครบัญชี | `pages/Register` | `/register` | |
 | ตั้งรหัสผ่านใหม่ | `pages/ResetPassword` | `/reset-password` | |
 | ผู้ดูแลระบบ | `pages/AdminDashboard` | `/admin` | |
 | ผู้ดูแลระบบสูงสุด | `pages/SuperadminDashboard` | `/superadmin` | |
-| ไม่พบหน้า | `pages/NotFound` | เส้นทางที่ไม่ได้ลงทะเบียน | |
+
+URL ที่ไม่ได้ลงทะเบียนจะกลับไปที่ `/`
 
 ## ไฟล์ที่ใช้ร่วมกัน
 
@@ -68,4 +66,4 @@
 
 ## import
 
-ใช้ `@/` แทนการไล่ `../../` เช่น `import Navbar from '@/components/layout/Navbar'`
+ใช้ `@/` แทนการไล่ `../../` เช่น `import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'`

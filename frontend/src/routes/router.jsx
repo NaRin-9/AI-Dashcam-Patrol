@@ -4,11 +4,6 @@ import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate,
 
 export { BrowserRouter as Router, Link, Navigate, Route, Routes, useLocation, useNavigate, useSearchParams }
 
-// path ปัจจุบัน เช่น '/login'
-export function usePath() {
-  return useLocation().pathname
-}
-
 // เลื่อนกลับบนสุดทุกครั้งที่เปลี่ยนหน้า
 export function ScrollToTop() {
   const { pathname } = useLocation()
