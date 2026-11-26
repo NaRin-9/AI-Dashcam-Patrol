@@ -10,7 +10,9 @@
   --dash-rail-toggle-bottom: max(20px, env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: var(--dash-rail-width) minmax(0, 1fr);
-  min-height: 100svh;
+  grid-template-rows: minmax(0, 1fr);
+  height: 100dvh;
+  overflow: clip;
   background: var(--dash-background);
   color: #302933;
 }
@@ -29,9 +31,8 @@
   display: flex;
   flex-direction: column;
   align-self: start;
-  position: sticky;
-  top: 0;
-  height: 100svh;
+  position: relative;
+  height: 100%;
   color: white;
   background: var(--purple-dark);
   isolation: isolate;
@@ -89,20 +90,28 @@
     width: var(--dash-rail-width);
     transform: translateX(calc(-1 * var(--dash-rail-offset)));
   }
-  .dash-rail :is(.dash-brand, nav a:not([aria-current]), nav a[aria-current] > *) {
+  .dash-rail :is(.dash-brand, nav a > span) {
     opacity: var(--dash-rail-label-opacity);
   }
+  .dash-rail nav { grid-template-columns: minmax(0, 1fr); }
+  .dash-rail nav a {
+    --dash-rail-link-inset: 8px;
+    --dash-rail-icon-size: 20px;
+    --dash-rail-icon-padding: calc((var(--dash-collapsed-rail-width) - var(--dash-rail-icon-size)) / 2 - var(--dash-rail-link-inset));
+    justify-self: end;
+    width: calc(100% - (100% - var(--dash-collapsed-rail-width) + var(--dash-rail-link-inset)) * var(--dash-rail-progress));
+    padding-inline-start: calc(16px + (var(--dash-rail-icon-padding) - 16px) * var(--dash-rail-progress));
+  }
+  .dash-rail nav a:focus-visible { outline-offset: -3px; }
+  .dash-rail nav a > svg { width: var(--dash-rail-icon-size); flex-shrink: 0; }
+  .dash-rail nav a > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .dash-rail nav a[aria-current] {
     --dash-rail-curve: 14px;
     /* Overlap the rail edge so it can't bleed through at fractional pixel widths. */
     --dash-rail-notch-overlap: 1px;
     position: relative;
-    justify-self: end;
-    width: calc(100% - (100% - var(--dash-collapsed-rail-width) + 8px) * var(--dash-rail-progress));
     box-shadow: var(--dash-rail-notch-overlap) 0 var(--dash-background);
-    white-space: nowrap;
   }
-  .dash-rail nav a[aria-current] > * { flex-shrink: 0; }
   .dash-rail nav a[aria-current]::before,
   .dash-rail nav a[aria-current]::after {
     content: '';
@@ -139,13 +148,22 @@
   .dash-rail {
     overflow-x: hidden;
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding-bottom: calc(var(--dash-rail-toggle-size) + var(--dash-rail-toggle-bottom) + 12px);
   }
 }
 
 /* Page header and account menu */
-.dash-main { min-width: 0; font-size: 1.125rem; }
+.dash-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  font-size: 1.125rem;
+}
 .dash-top {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) min(35%, 19rem) auto;
   align-items: center;
@@ -160,6 +178,7 @@
   font-weight: 750;
   overflow-wrap: anywhere;
 }
+.dash-top[data-search="false"] { grid-template-columns: minmax(0, 1fr) auto; }
 .dash-top-actions { display: contents; }
 .dash-map-back,
 .dash-map-search-toggle { display: none; }
@@ -215,11 +234,16 @@
   margin-top: 3px;
   transform: rotate(225deg);
 }
-.dash-account-menu { position: absolute; z-index: 3; right: 0; top: calc(100% + 12px); display: grid; min-width: 225px; max-width: 90vw; padding: 16px; gap: 7px; background: white; border: 1px solid var(--dash-line); border-radius: 10px; box-shadow: 0 8px 20px #30293318; overflow-wrap: anywhere; }
+.dash-account-menu { position: absolute; z-index: 3; right: 0; top: calc(100% + 12px); display: grid; min-width: 225px; max-width: 90vw; max-height: 65dvh; overflow-y: auto; padding: 16px; gap: 7px; background: white; border: 1px solid var(--dash-line); border-radius: 10px; box-shadow: 0 8px 20px #30293318; overflow-wrap: anywhere; }
 .dash-account-menu small { color: var(--dash-muted); }
 .dash-account-menu a, .dash-account-menu button { text-align: left; padding: 5px 0; color: var(--purple); background: transparent; border: 0; }
 
 /* Shared content panels */
+.dash-scroll {
+  overflow: auto;
+  overscroll-behavior: contain;
+  isolation: isolate;
+}
 .dash-content { max-width: 1650px; margin: 0 auto; padding: 24px clamp(16px, 2.5vw, 42px) 36px; }
 .dash-grid {
   display: grid;
@@ -249,7 +273,10 @@
   .dash-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 760px) {
-  .patrol-dashboard { display: block; }
+  .patrol-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
   .dash-rail { height: auto; position: relative; padding: 10px 16px 0; }
   .dash-rail::after { inset: 0; height: auto; background-position: right center; }
   .dash-brand { align-self: flex-start; display: flex; padding: 0 0 8px; }
@@ -270,14 +297,10 @@
 [data-page="overview"] .dash-content { max-width: 1760px; }
 
 @media (max-width: 760px) {
-  .patrol-dashboard {
-    --dash-mobile-nav-height: calc(72px + env(safe-area-inset-bottom));
-  }
+  .dash-main { grid-row: 1; }
   .patrol-dashboard .dash-rail {
-    position: fixed;
+    grid-row: 2;
     z-index: 4;
-    inset: auto 0 0;
-    height: auto;
     padding: 7px 8px max(5px, env(safe-area-inset-bottom));
     border-radius: 20px 20px 0 0;
     background: var(--purple-dark);
@@ -286,7 +309,8 @@
   .patrol-dashboard .dash-brand { display: none; }
   .patrol-dashboard .dash-rail nav {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
     gap: 4px;
   }
   .patrol-dashboard .dash-rail nav a {

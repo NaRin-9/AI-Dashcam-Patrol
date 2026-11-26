@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import UserLayout from '@/components/layout/user/UserLayout'
+import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import { useAuth } from '@/contexts/AuthContext'
 import RiskMapLegend from '@/components/risk-cases/RiskMapLegend'
 import SurveyMap from '@/components/risk-cases/SurveyMap'
@@ -18,7 +18,7 @@ export default function LiveMapPage() {
   const hasTracks = isAdminOrAbove && data?.tracks?.some((track) => track.points.length >= 2)
 
   return (
-    <UserLayout activePage="map" title="แผนที่จุดเสี่ยง" query={query} onQueryChange={setQuery}>
+    <DashboardLayout activePage="map" title="แผนที่จุดเสี่ยง" query={query} onQueryChange={setQuery}>
       <section className="dash-panel dash-map dash-expanded-map" aria-label="แผนที่จุดเสี่ยง">
         <SurveyMap data={visibleData} showTracks={isAdminOrAbove} />
         <RiskMapLegend showTracks={hasTracks} />
@@ -27,6 +27,6 @@ export default function LiveMapPage() {
         </p>}
         {error && <p className="live-map-status" role="alert">โหลดข้อมูลแผนที่ไม่สำเร็จ <button onClick={() => window.location.reload()}>ลองอีกครั้ง</button></p>}
       </section>
-    </UserLayout>
+    </DashboardLayout>
   )
 }

@@ -17,18 +17,15 @@ AI-Dashcam-Patrol/
 │  │  ├─ app/
 │  │  │  └─ App.jsx                เลือกหน้าที่จะแสดงตาม URL
 │  │  ├─ routes/
-│  │  │  ├─ index.jsx              รายการหน้าทั้งหมดและเมนู (เพิ่มหน้าใหม่ที่นี่)
+│  │  │  ├─ index.jsx              รายการหน้าและสิทธิ์การเข้าถึง
 │  │  │  └─ router.jsx             ตัวเปลี่ยนหน้าแบบ /path และ <Link>
 │  │  ├─ pages/                    1 โฟลเดอร์ = 1 หน้า
-│  │  │  ├─ Home/                  HomePage.jsx, components/Hero.jsx
+│  │  │  ├─ Welcome/               หน้าต้อนรับบนมือถือ
 │  │  │  ├─ LiveMap/               แผนที่เส้นทางรถและจุดเสี่ยง
-│  │  │  ├─ RiskReports/           รายการ span เรียงตามความเสี่ยง
-│  │  │  ├─ HowItWorks/            ขั้นตอนการทำงานของระบบ
-│  │  │  ├─ Login/                 เข้าสู่ระบบ
-│  │  │  └─ NotFound/              หน้าเมื่อไม่พบ URL
+│  │  │  └─ Login/                 เข้าสู่ระบบ
 │  │  ├─ components/               ส่วนประกอบที่ใช้หลายหน้า
-│  │  │  ├─ layout/                Layout.jsx, Navbar.jsx
-│  │  │  └─ ui/                    PagePlaceholder.jsx และปุ่ม การ์ด ฯลฯ
+│  │  │  ├─ layout/dashboard/      โครงหน้าปฏิบัติงานทุกบทบาท
+│  │  │  └─ ui/                    คอมโพเนนต์ใช้ร่วมกัน
 │  │  ├─ services/api.js           จุดเดียวที่เรียก backend
 │  │  ├─ hooks/                    custom hooks
 │  │  ├─ utils/                    ฟังก์ชันช่วยทั่วไป

@@ -7,6 +7,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  Users,
+  Building2,
 } from 'lucide-react'
 
 const iconComponents = {
@@ -18,6 +20,8 @@ const iconComponents = {
   back: ChevronLeft,
   arrow: ChevronRight,
   expand: ExternalLink,
+  users: Users,
+  departments: Building2,
 }
 
 export default function UserIcon({ name, size = 20, className = '' }) {

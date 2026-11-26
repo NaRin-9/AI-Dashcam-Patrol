@@ -1,11 +1,14 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
-import UserSidebar from './UserSidebar'
-import UserTopBar from './UserTopBar'
-import './user-layout.css'
+import DashboardSidebar from './DashboardSidebar'
+import DashboardTopBar from './DashboardTopBar'
+import './dashboard-layout.css'
 
-export default function UserLayout({ activePage, title, query, onQueryChange, searchAction, children }) {
-  const [railExpanded, setRailExpanded] = useState(true)
+// Share the current rail state across user routes within this app session.
+let desktopRailExpanded = true
+
+export default function DashboardLayout({ activePage, title, query, onQueryChange, searchAction, children }) {
+  const [railExpanded, setRailExpanded] = useState(() => desktopRailExpanded)
   const layoutRef = useRef(null)
   const railMotion = useRef(null)
 
@@ -31,22 +34,29 @@ export default function UserLayout({ activePage, title, query, onQueryChange, se
     else railMotion.current?.play()
   }, [railExpanded])
 
+  function toggleRail() {
+    desktopRailExpanded = !railExpanded
+    setRailExpanded(desktopRailExpanded)
+  }
+
   return (
     <div ref={layoutRef} className="patrol-dashboard" data-page={activePage} data-rail-expanded={railExpanded}>
-      <UserSidebar
+      <DashboardSidebar
         activePage={activePage}
         expanded={railExpanded}
-        onToggle={() => setRailExpanded((expanded) => !expanded)}
+        onToggle={toggleRail}
       />
       <main className="dash-main">
-        <UserTopBar
+        <DashboardTopBar
           activePage={activePage}
           title={title}
           query={query}
           onQueryChange={onQueryChange}
           searchAction={searchAction}
         />
-        <div className="dash-content">{children}</div>
+        <div className="dash-scroll" key={activePage}>
+          <div className="dash-content">{children}</div>
+        </div>
       </main>
     </div>
   )

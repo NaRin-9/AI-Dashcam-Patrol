@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
+import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import { useAuth } from '@/contexts/AuthContext'
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api'
 
 const card = {
-  background: 'rgba(255,255,255,0.08)',
+  background: '#fff',
+  border: '1px solid var(--dash-line)',
   borderRadius: 16,
-  padding: '28px 32px',
-  backdropFilter: 'blur(8px)',
+  padding: 'clamp(12px, 3vw, 28px)',
 }
 
 const roleBadge = (role) => ({
@@ -25,13 +26,13 @@ const th = {
   fontSize: '0.85rem',
   fontWeight: 600,
   opacity: 0.7,
-  borderBottom: '1px solid rgba(255,255,255,0.15)',
+  borderBottom: '1px solid var(--dash-line)',
 }
 
 const td = {
   padding: '10px 14px',
   fontSize: '0.9rem',
-  borderBottom: '1px solid rgba(255,255,255,0.08)',
+  borderBottom: '1px solid var(--dash-line)',
 }
 
 export default function AdminDashboardPage() {
@@ -221,142 +222,143 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
-        <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: 0 }}>
-            Admin Dashboard
-          </h1>
-          <p style={{ opacity: 0.8, margin: '6px 0 0' }}>
-            จัดการผู้ใช้งานในระบบ (เพิ่ม ลบ แก้ไข ทั้ง User, Admin, Super Admin พร้อมระบุชื่อ-นามสกุล และแผนก)
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            setFormData({
-              username: '',
-              email: '',
-              firstName: '',
-              lastName: '',
-              departmentId: '',
-              password: '',
-              roleId: 1,
-              isActive: true,
-            })
-            setModalError(null)
-            setShowAddModal(true)
-          }}
-          style={addBtn}
-        >
-          + เพิ่มผู้ใช้งานใหม่
-        </button>
-      </div>
-
-      <div style={card}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
-            ผู้ใช้ทั้งหมด ({users.length})
-          </h2>
-          <button onClick={fetchUsers} style={refreshBtn} disabled={loading}>
-            {loading ? '⏳' : '🔄'} Refresh
-          </button>
-        </div>
-
-        {error && (
-          <p style={{ color: '#ffd54a', marginBottom: 16 }}>⚠️ {error}</p>
-        )}
-
-        {loading ? (
-          <p style={{ opacity: 0.7, textAlign: 'center', padding: 32 }}>กำลังโหลด...</p>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={th}>Username</th>
-                  <th style={th}>ชื่อ - นามสกุล</th>
-                  <th style={th}>แผนก</th>
-                  <th style={th}>Email</th>
-                  <th style={th}>Role</th>
-                  <th style={th}>สถานะ</th>
-                  <th style={th}>การดำเนินการ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => {
-                  const isCurrentUser = u.id === currentUser?.id
-
-                  return (
-                    <tr key={u.id}>
-                      <td style={td}>
-                        <strong>{u.username}</strong>
-                        {isCurrentUser && <span style={{ opacity: 0.6, fontSize: '0.8rem', marginLeft: 6 }}>(คุณ)</span>}
-                      </td>
-                      <td style={td}>
-                        {u.firstName || u.lastName ? `${u.firstName || ''} ${u.lastName || ''}`.trim() : '-'}
-                      </td>
-                      <td style={td}>
-                        {u.department ? (
-                          <span style={{
-                            display: 'inline-block',
-                            padding: '2px 8px',
-                            borderRadius: 6,
-                            background: 'rgba(255,255,255,0.15)',
-                            fontSize: '0.8rem',
-                          }}>
-                            🏢 {u.department}
-                          </span>
-                        ) : '-'}
-                      </td>
-                      <td style={td}>{u.email}</td>
-                      <td style={td}>
-                        <span style={roleBadge(u.role)}>{u.role}</span>
-                      </td>
-                      <td style={td}>{u.isActive ? '✅ Active' : '❌ Inactive'}</td>
-                      <td style={td}>
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-                          <select
-                            value={u.role === 'superadmin' ? 3 : u.role === 'admin' ? 2 : 1}
-                            onChange={(e) => handleRoleChange(u.id, Number(e.target.value))}
-                            disabled={updating === u.id}
-                            style={selectStyle}
-                          >
-                            <option value={1}>user</option>
-                            <option value={2}>admin</option>
-                            <option value={3}>superadmin</option>
-                          </select>
-                          <button
-                            onClick={() => handleToggleActive(u.id, u.isActive)}
-                            disabled={updating === u.id}
-                            style={{
-                              ...smallBtn,
-                              background: u.isActive ? '#b8044e' : '#1a8a4a',
-                            }}
-                          >
-                            {u.isActive ? 'Deactivate' : 'Activate'}
-                          </button>
-                          <button
-                            onClick={() => openEditModal(u)}
-                            style={{ ...smallBtn, background: '#4b5563' }}
-                          >
-                            ✏️ แก้ไข
-                          </button>
-                          <button
-                            onClick={() => openDeleteModal(u)}
-                            style={{ ...smallBtn, background: '#dc2626' }}
-                          >
-                            🗑️ ลบ
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+    <>
+      <DashboardLayout activePage="admin" title="จัดการผู้ใช้">
+        <div style={{ maxWidth: 1100, margin: '0 auto', minWidth: 0 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+            <div>
+              <p style={{ opacity: 0.8, margin: '6px 0 0' }}>
+                จัดการผู้ใช้งานในระบบ (เพิ่ม ลบ แก้ไข ทั้ง User, Admin, Super Admin พร้อมระบุชื่อ-นามสกุล และแผนก)
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setFormData({
+                  username: '',
+                  email: '',
+                  firstName: '',
+                  lastName: '',
+                  departmentId: '',
+                  password: '',
+                  roleId: 1,
+                  isActive: true,
+                })
+                setModalError(null)
+                setShowAddModal(true)
+              }}
+              style={addBtn}
+            >
+              + เพิ่มผู้ใช้งานใหม่
+            </button>
           </div>
-        )}
-      </div>
+
+          <div style={card}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
+                ผู้ใช้ทั้งหมด ({users.length})
+              </h2>
+              <button onClick={fetchUsers} style={refreshBtn} disabled={loading}>
+                {loading ? '⏳' : '🔄'} Refresh
+              </button>
+            </div>
+
+            {error && (
+              <p style={{ color: '#b91c1c', marginBottom: 16 }}>⚠️ {error}</p>
+            )}
+
+            {loading ? (
+              <p style={{ opacity: 0.7, textAlign: 'center', padding: 32 }}>กำลังโหลด...</p>
+            ) : (
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th style={th}>Username</th>
+                      <th style={th}>ชื่อ - นามสกุล</th>
+                      <th style={th}>แผนก</th>
+                      <th style={th}>Email</th>
+                      <th style={th}>Role</th>
+                      <th style={th}>สถานะ</th>
+                      <th style={th}>การดำเนินการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((u) => {
+                      const isCurrentUser = u.id === currentUser?.id
+
+                      return (
+                        <tr key={u.id}>
+                          <td style={td}>
+                            <strong>{u.username}</strong>
+                            {isCurrentUser && <span style={{ opacity: 0.6, fontSize: '0.8rem', marginLeft: 6 }}>(คุณ)</span>}
+                          </td>
+                          <td style={td}>
+                            {u.firstName || u.lastName ? `${u.firstName || ''} ${u.lastName || ''}`.trim() : '-'}
+                          </td>
+                          <td style={td}>
+                            {u.department ? (
+                              <span style={{
+                                display: 'inline-block',
+                                padding: '2px 8px',
+                                borderRadius: 6,
+                                background: '#f4e8f1',
+                                fontSize: '0.8rem',
+                              }}>
+                                🏢 {u.department}
+                              </span>
+                            ) : '-'}
+                          </td>
+                          <td style={td}>{u.email}</td>
+                          <td style={td}>
+                            <span style={roleBadge(u.role)}>{u.role}</span>
+                          </td>
+                          <td style={td}>{u.isActive ? '✅ Active' : '❌ Inactive'}</td>
+                          <td style={td}>
+                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+                              <select
+                                value={u.role === 'superadmin' ? 3 : u.role === 'admin' ? 2 : 1}
+                                onChange={(e) => handleRoleChange(u.id, Number(e.target.value))}
+                                disabled={updating === u.id}
+                                style={selectStyle}
+                              >
+                                <option value={1}>user</option>
+                                <option value={2}>admin</option>
+                                <option value={3}>superadmin</option>
+                              </select>
+                              <button
+                                onClick={() => handleToggleActive(u.id, u.isActive)}
+                                disabled={updating === u.id}
+                                style={{
+                                  ...smallBtn,
+                                  background: u.isActive ? '#b8044e' : '#1a8a4a',
+                                }}
+                              >
+                                {u.isActive ? 'Deactivate' : 'Activate'}
+                              </button>
+                              <button
+                                onClick={() => openEditModal(u)}
+                                style={{ ...smallBtn, background: '#4b5563' }}
+                              >
+                                ✏️ แก้ไข
+                              </button>
+                              <button
+                                onClick={() => openDeleteModal(u)}
+                                style={{ ...smallBtn, background: '#dc2626' }}
+                              >
+                                🗑️ ลบ
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </DashboardLayout>
 
       {/* Add User Modal */}
       {showAddModal && (
@@ -563,13 +565,13 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 
 const addBtn = {
   padding: '10px 20px',
-  background: 'var(--gold)',
+  background: 'var(--purple)',
   color: '#fff',
   border: 'none',
   borderRadius: 10,
@@ -580,8 +582,8 @@ const addBtn = {
 
 const refreshBtn = {
   padding: '6px 16px',
-  background: 'rgba(255,255,255,0.15)',
-  color: '#fff',
+  background: '#f4e8f1',
+  color: 'var(--purple-dark)',
   border: 'none',
   borderRadius: 8,
   fontWeight: 600,
@@ -592,9 +594,9 @@ const refreshBtn = {
 const selectStyle = {
   padding: '5px 8px',
   borderRadius: 6,
-  border: '1px solid rgba(255,255,255,0.3)',
-  background: 'rgba(0,0,0,0.3)',
-  color: '#fff',
+  border: '1px solid var(--dash-line)',
+  background: '#fff',
+  color: '#302933',
   fontSize: '0.8rem',
   cursor: 'pointer',
 }
@@ -627,6 +629,8 @@ const modalBox = {
   padding: '28px',
   width: '100%',
   maxWidth: 480,
+  maxHeight: 'calc(100dvh - 40px)',
+  overflowY: 'auto',
   border: '1px solid rgba(255,255,255,0.2)',
   boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
 }

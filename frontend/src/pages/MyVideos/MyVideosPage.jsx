@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Icon from '@/components/ui/UserIcon'
-import UserLayout from '@/components/layout/user/UserLayout'
+import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import { apiGet } from '@/services/api'
 import VideoUpload from './components/VideoUpload'
 import './my-videos.css'
@@ -41,7 +41,7 @@ export default function MyVideosPage() {
   const visible = result.videos.filter((video) => video.name.toLowerCase().includes(term))
 
   return (
-    <UserLayout
+    <DashboardLayout
       activePage="videos"
       title="วิดีโอของฉัน"
       query={query}
@@ -78,6 +78,6 @@ export default function MyVideosPage() {
           ))}
         </ul>}
       </section>
-    </UserLayout>
+    </DashboardLayout>
   )
 }

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ListFilter } from 'lucide-react'
 import RiskDetails from '@/components/risk-cases/RiskDetails'
 import RiskMapPanel from '@/components/risk-cases/RiskMapPanel'
-import UserLayout from '@/components/layout/user/UserLayout'
+import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import useSurvey from '@/hooks/useSurvey'
 import { captureTime, riskLabels } from '@/utils/risk-case-format'
@@ -36,7 +36,7 @@ export default function RiskCasesPage() {
   const cases = mapData?.cases ?? []
 
   return (
-    <UserLayout
+    <DashboardLayout
       activePage="cases"
       title="รายการจุดเสี่ยง"
       query={query}
@@ -89,6 +89,6 @@ export default function RiskCasesPage() {
         </section>
         {showMap && <RiskMapPanel data={mapData} />}
       </div>
-    </UserLayout>
+    </DashboardLayout>
   )
 }

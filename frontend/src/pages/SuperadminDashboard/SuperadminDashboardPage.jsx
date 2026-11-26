@@ -1,17 +1,26 @@
 import { useState, useEffect, useCallback } from 'react'
+import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import { useAuth } from '@/contexts/AuthContext'
+import { Link, useSearchParams } from '@/routes/router'
 import { apiGet, apiPost, apiPut, apiDelete } from '@/services/api'
 import SurveyMap from '@/components/risk-cases/SurveyMap'
 import useSurvey from '@/hooks/useSurvey'
-import logo from '@/assets/pea-logo.png'
 import './superadmin-dashboard.css'
 
-export default function SuperadminDashboardPage() {
-  const { user: currentUser, logout } = useAuth()
+const dashboardViews = {
+  dashboard: { page: 'superadmin', title: 'ภาพรวมระบบ' },
+  users: { page: 'superadmin-users', title: 'จัดการผู้ใช้' },
+  departments: { page: 'superadmin-departments', title: 'จัดการแผนก' },
+}
 
-  // Layout states
-  const [sidebarExpanded, setSidebarExpanded] = useState(true)
-  const [currentView, setCurrentView] = useState('dashboard') // 'dashboard' | 'users' | 'departments'
+export default function SuperadminDashboardPage() {
+  const { user: currentUser } = useAuth()
+
+  const [searchParams] = useSearchParams()
+  const requestedView = searchParams.get('view')
+  const currentView = Object.hasOwn(dashboardViews, requestedView) ? requestedView : 'dashboard'
+  const { page, title } = dashboardViews[currentView]
+  const isOverview = currentView === 'dashboard'
 
   // Time filter state: 'today' | 'week' | 'month' | 'last_month'
   const [timeFilter, setTimeFilter] = useState('month')
@@ -400,172 +409,13 @@ export default function SuperadminDashboardPage() {
   }
 
   return (
-    <div className="superadmin-container">
-      {/* ================= SIDEBAR ================= */}
-      <aside className={`superadmin-sidebar ${sidebarExpanded ? 'expanded' : 'collapsed'}`}>
-        {/* Curved Notch Toggle */}
-        <button
-          className="superadmin-toggle-notch"
-          onClick={() => setSidebarExpanded(!sidebarExpanded)}
-          title={sidebarExpanded ? 'ย่อ Side Bar' : 'ขยาย Side Bar'}
-          aria-label={sidebarExpanded ? 'ย่อ Side Bar' : 'ขยาย Side Bar'}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ transform: sidebarExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-          >
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
-
-        {/* Brand Header */}
-        <div className="superadmin-sidebar-header">
-          <img src={logo} alt="PEA Logo" className="superadmin-sidebar-logo" />
-          {sidebarExpanded && (
-            <div className="superadmin-sidebar-title">
-              <strong>PEA PATROL</strong>
-              <span>Super Admin Portal</span>
-            </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <nav className="superadmin-nav">
-          <button
-            className={`superadmin-nav-item ${currentView === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setCurrentView('dashboard')}
-            title="Dashboard ภาพรวม"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="7" />
-              <rect x="14" y="3" width="7" height="7" />
-              <rect x="14" y="14" width="7" height="7" />
-              <rect x="3" y="14" width="7" height="7" />
-            </svg>
-            {sidebarExpanded && <span>แดชบอร์ด (Overview)</span>}
-          </button>
-
-          <button
-            className={`superadmin-nav-item ${currentView === 'users' ? 'active' : ''}`}
-            onClick={() => setCurrentView('users')}
-            title="จัดการผู้ใช้งาน"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-            {sidebarExpanded && <span>จัดการผู้ใช้ (Users)</span>}
-          </button>
-
-          <button
-            className={`superadmin-nav-item ${currentView === 'departments' ? 'active' : ''}`}
-            onClick={() => setCurrentView('departments')}
-            title="จัดการแผนก"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-              <line x1="9" y1="22" x2="9" y2="22.01" />
-              <line x1="15" y1="22" x2="15" y2="22.01" />
-              <line x1="9" y1="18" x2="9" y2="18.01" />
-              <line x1="15" y1="18" x2="15" y2="18.01" />
-              <line x1="9" y1="14" x2="9" y2="14.01" />
-              <line x1="15" y1="14" x2="15" y2="14.01" />
-              <line x1="9" y1="10" x2="9" y2="10.01" />
-              <line x1="15" y1="10" x2="15" y2="10.01" />
-              <line x1="9" y1="6" x2="9" y2="6.01" />
-              <line x1="15" y1="6" x2="15" y2="6.01" />
-            </svg>
-            {sidebarExpanded && <span>จัดการแผนก (Departments)</span>}
-          </button>
-
-          <a href="/#/live-map" className="superadmin-nav-item" title="แผนที่สด">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-              <line x1="8" y1="2" x2="8" y2="18" />
-              <line x1="16" y1="6" x2="16" y2="22" />
-            </svg>
-            {sidebarExpanded && <span>แผนที่ตรวจการณ์</span>}
-          </a>
-
-          <a href="/#/risk-reports" className="superadmin-nav-item" title="รายงานความเสี่ยง">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-            </svg>
-            {sidebarExpanded && <span>รายงานความเสี่ยง</span>}
-          </a>
-        </nav>
-
-        {/* Footer */}
-        <div className="superadmin-sidebar-footer">
-          <button
-            onClick={logout}
-            className="superadmin-nav-item"
-            title="ออกจากระบบ"
-            style={{ color: '#fca5a5' }}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-              <polyline points="16 17 21 12 16 7" />
-              <line x1="21" y1="12" x2="9" y2="12" />
-            </svg>
-            {sidebarExpanded && <span>ออกจากระบบ</span>}
-          </button>
-        </div>
-      </aside>
-
-      {/* ================= MAIN CONTENT ================= */}
-      <main className="superadmin-main">
-        {/* Top Header */}
-        <header className="superadmin-header">
-          <div className="superadmin-search-bar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search..."
-              value={alertSearch}
-              onChange={(e) => setAlertSearch(e.target.value)}
-            />
-          </div>
-
-          <div className="superadmin-header-right">
-            <div className="superadmin-user-profile">
-              <div className="superadmin-user-info">
-                <span className="superadmin-user-name">
-                  {currentUser?.firstName ? `${currentUser.firstName} ${currentUser.lastName || ''}` : (currentUser?.username || 'Super Admin')}
-                </span>
-                <span className="superadmin-user-role">Super Admin</span>
-              </div>
-              <div className="superadmin-avatar">
-                {currentUser?.username?.charAt(0).toUpperCase() || 'S'}
-              </div>
-            </div>
-
-            <button className="superadmin-bell-btn" title="การแจ้งเตือน">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-              <span className="superadmin-bell-badge" />
-            </button>
-          </div>
-        </header>
-
-        {/* Body Views */}
+    <>
+      <DashboardLayout
+        activePage={page}
+        title={title}
+        query={isOverview ? alertSearch : userSearch}
+        onQueryChange={isOverview ? setAlertSearch : currentView === 'users' ? setUserSearch : undefined}
+      >
         <div className="superadmin-body">
           {currentView === 'dashboard' ? (
             /* ================= VIEW: DASHBOARD ================= */
@@ -634,12 +484,12 @@ export default function SuperadminDashboardPage() {
                       </svg>
                       แสดงแผนที่ (Survey Map)
                     </h2>
-                    <a
-                      href="/#/live-map"
+                    <Link
+                      to="/live-map"
                       style={{ fontSize: '0.85rem', color: 'var(--sa-purple)', fontWeight: 600, textDecoration: 'none' }}
                     >
                       ขยายเต็มจอ ↗
-                    </a>
+                    </Link>
                   </div>
                   <div className="superadmin-map-container">
                     <SurveyMap data={mapData} selection={mapSelection} />
@@ -851,15 +701,6 @@ export default function SuperadminDashboardPage() {
 
               {/* Filters */}
               <div className="superadmin-table-filters">
-                <div className="superadmin-table-search">
-                  <input
-                    type="text"
-                    placeholder="🔍 ค้นหาตามชื่อ, นามสกุล, อีเมล หรือแผนก..."
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                  />
-                </div>
-
                 <div className="superadmin-role-filter-pills">
                   <button
                     className={`superadmin-role-pill ${userRoleFilter === 'all' ? 'active' : ''}`}
@@ -1040,7 +881,7 @@ export default function SuperadminDashboardPage() {
             </section>
           )}
         </div>
-      </main>
+      </DashboardLayout>
 
       {/* ================= MODAL: ADD USER ================= */}
       {showAddModal && (
@@ -1418,6 +1259,6 @@ export default function SuperadminDashboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import RiskMapPanel from '@/components/risk-cases/RiskMapPanel'
-import UserLayout from '@/components/layout/user/UserLayout'
+import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import useSurvey from '@/hooks/useSurvey'
 import OverviewCaseList from './components/OverviewCaseList'
 import OverviewSummary from './components/OverviewSummary'
@@ -39,7 +39,7 @@ export default function DashboardPage() {
   )
 
   return (
-    <UserLayout activePage="overview" title="ภาพรวม" query={query} onQueryChange={setQuery}>
+    <DashboardLayout activePage="overview" title="ภาพรวม" query={query} onQueryChange={setQuery}>
       {error && (
         <div className="overview-error" role="alert">
           <span>โหลดข้อมูลจุดเสี่ยงไม่สำเร็จ</span>
@@ -50,6 +50,6 @@ export default function DashboardPage() {
       <div className="dash-grid overview-grid" data-searching={isSearching}>
         {isSearching ? [caseList, map] : [map, caseList]}
       </div>
-    </UserLayout>
+    </DashboardLayout>
   )
 }

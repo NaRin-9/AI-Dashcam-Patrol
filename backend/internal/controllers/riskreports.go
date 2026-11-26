@@ -19,7 +19,6 @@ func NewRiskReportsController() *RiskReportsController {
 }
 
 // ListRiskReports คืนรายการ span ที่มีความเสี่ยง: GET /api/risk-reports
-// ใช้กับหน้า frontend/src/pages/RiskReports
 func (ctrl *RiskReportsController) ListRiskReports(c *gin.Context) {
 	spans, err := services.ListRiskSpans(c.Request.Context())
 	if err != nil {
