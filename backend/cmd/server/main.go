@@ -76,12 +76,6 @@ func main() {
 		}
 	}
 
-	if password := os.Getenv("USER_PASSWORD"); password != "" {
-		if err := database.SeedUser(db, os.Getenv("USER_USERNAME"), os.Getenv("USER_EMAIL"), password); err != nil {
-			log.Fatalf("failed to seed user: %v", err)
-		}
-	}
-
 	// สร้าง Service instances
 	authService := services.NewAuthService(db, cfg)
 	userService := services.NewUserService(db)
