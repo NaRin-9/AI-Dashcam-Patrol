@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import RiskMapPanel from '@/components/risk-cases/RiskMapPanel'
+import DashboardGreeting from '@/components/layout/dashboard/DashboardGreeting'
 import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import useSurvey from '@/hooks/useSurvey'
+import { apiGet } from '@/services/api'
 import OverviewCaseList from './components/OverviewCaseList'
 import OverviewSummary from './components/OverviewSummary'
 import './dashboard-overview.css'
@@ -10,6 +12,7 @@ const recentCaseLimit = 5
 
 export default function DashboardPage() {
   const { data, error } = useSurvey()
+  const [videos, setVideos] = useState(null)
   const [query, setQuery] = useState('')
   const term = query.trim().toLowerCase()
   const [selection, setSelection] = useState(null)
@@ -20,6 +23,18 @@ export default function DashboardPage() {
     .filter((item) => item.id.toLowerCase().includes(term))
     .sort((a, b) => Date.parse(b.capturedAt) - Date.parse(a.capturedAt))
   const visibleCases = isSearching ? matches : matches.slice(0, recentCaseLimit)
+
+  useEffect(() => {
+    const request = new AbortController()
+    apiGet('/videos', { signal: request.signal })
+      .then((res) => {
+        if (!request.signal.aborted) setVideos(res.videos ?? [])
+      })
+      .catch(() => {
+        if (!request.signal.aborted) setVideos(null)
+      })
+    return () => request.abort()
+  }, [])
 
   useEffect(() => {
     if (selection) mapPanel.current?.scrollIntoView({ block: 'nearest' })
@@ -46,7 +61,8 @@ export default function DashboardPage() {
           <button type="button" onClick={() => window.location.reload()}>ลองอีกครั้ง</button>
         </div>
       )}
-      <OverviewSummary cases={data ? cases : null} />
+      <DashboardGreeting searching={isSearching} />
+      <OverviewSummary cases={data ? cases : null} videos={videos} />
       <div className="dash-grid overview-grid" data-searching={isSearching}>
         {isSearching ? [caseList, map] : [map, caseList]}
       </div>

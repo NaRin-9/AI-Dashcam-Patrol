@@ -10,8 +10,18 @@
   --bg-map-gradient: url('../assets/world-map.svg') center 60% / cover no-repeat,
                      linear-gradient(180deg, #74045f 0%, #74045f 32%, #a70689 64%, #da08b3 89%, #da08b3 100%);
 
-  /* Inter covers Latin; Noto Sans Thai picks up the Thai glyphs */
-  --font: 'Inter', 'Noto Sans Thai', 'Leelawadee UI', Tahoma, system-ui, sans-serif;
+  /* Inter covers Latin/digits; Sarabun covers Thai glyphs */
+  --font: 'Inter', 'Sarabun', 'IBM Plex Sans Thai Looped', 'Leelawadee UI', Tahoma, system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', var(--font);
+
+  /* Standard Typography Scale (base 1rem = 16px) */
+  --text-xs: 0.75rem;      /* 12px: badge, caption, timestamp */
+  --text-sm: 0.875rem;     /* 14px: secondary text, sub-nav, metadata */
+  --text-base: 0.9375rem;  /* 15px: UI body, nav links, controls */
+  --text-md: 1rem;         /* 16px: primary body, form inputs */
+  --text-lg: 1.25rem;      /* 20px: section & panel heading */
+  --text-xl: clamp(1.5rem, 2.25vw, 2rem); /* 24px-32px: page title */
+
   --gutter: clamp(16px, 4.4vw, 80px);
   --text-left: clamp(16px, 11.2vw, 200px);
 }
@@ -33,9 +43,18 @@ body {
 
 body {
   font-family: var(--font);
+  font-size: var(--text-md);
+  line-height: 1.5;
   color: var(--white);
   background: var(--purple);
   -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 
 a {

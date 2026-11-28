@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ListFilter } from 'lucide-react'
 import RiskDetails from '@/components/risk-cases/RiskDetails'
-import RiskMapPanel from '@/components/risk-cases/RiskMapPanel'
 import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import useSurvey from '@/hooks/useSurvey'
@@ -87,7 +86,6 @@ export default function RiskCasesPage() {
           {data && !cases.length && <p className="dash-empty" role="status">{term || risk ? 'ไม่พบจุดเสี่ยงที่ตรงกับการค้นหา' : 'ยังไม่มีจุดเสี่ยงที่ยืนยันแล้ว'}</p>}
           {selectedCase && <RiskDetails riskCase={selectedCase} onClose={() => setSelectedCase(null)} />}
         </section>
-        {showMap && <RiskMapPanel data={mapData} />}
       </div>
     </DashboardLayout>
   )

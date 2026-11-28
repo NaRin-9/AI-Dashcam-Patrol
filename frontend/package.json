@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.3.4",
+    "antd": "^6.7.2",
     "gsap": "^3.15.1",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.79.0",
