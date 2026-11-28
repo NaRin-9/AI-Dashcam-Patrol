@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import DashboardGreeting from '@/components/layout/dashboard/DashboardGreeting'
 import DashboardLayout from '@/components/layout/dashboard/DashboardLayout'
 import { useAuth } from '@/contexts/AuthContext'
 import { Link, useSearchParams } from '@/routes/router'
@@ -420,35 +421,36 @@ export default function SuperadminDashboardPage() {
           {currentView === 'dashboard' ? (
             /* ================= VIEW: DASHBOARD ================= */
             <>
-              {/* Filter Pills on top right */}
-              <div className="superadmin-filter-bar">
-                <div className="superadmin-time-pills">
-                  <button
-                    className={`superadmin-time-pill ${timeFilter === 'today' ? 'active' : ''}`}
-                    onClick={() => setTimeFilter('today')}
-                  >
-                    To day
-                  </button>
-                  <button
-                    className={`superadmin-time-pill ${timeFilter === 'week' ? 'active' : ''}`}
-                    onClick={() => setTimeFilter('week')}
-                  >
-                    This Week
-                  </button>
-                  <button
-                    className={`superadmin-time-pill ${timeFilter === 'month' ? 'active' : ''}`}
-                    onClick={() => setTimeFilter('month')}
-                  >
-                    This Month
-                  </button>
-                  <button
-                    className={`superadmin-time-pill ${timeFilter === 'last_month' ? 'active' : ''}`}
-                    onClick={() => setTimeFilter('last_month')}
-                  >
-                    Last Month
-                  </button>
-                </div>
-              </div>
+              <DashboardGreeting
+                action={
+                  <div className="superadmin-time-pills">
+                    <button
+                      className={`superadmin-time-pill ${timeFilter === 'today' ? 'active' : ''}`}
+                      onClick={() => setTimeFilter('today')}
+                    >
+                      To day
+                    </button>
+                    <button
+                      className={`superadmin-time-pill ${timeFilter === 'week' ? 'active' : ''}`}
+                      onClick={() => setTimeFilter('week')}
+                    >
+                      This Week
+                    </button>
+                    <button
+                      className={`superadmin-time-pill ${timeFilter === 'month' ? 'active' : ''}`}
+                      onClick={() => setTimeFilter('month')}
+                    >
+                      This Month
+                    </button>
+                    <button
+                      className={`superadmin-time-pill ${timeFilter === 'last_month' ? 'active' : ''}`}
+                      onClick={() => setTimeFilter('last_month')}
+                    >
+                      Last Month
+                    </button>
+                  </div>
+                }
+              />
 
               {/* 3 Stat Cards */}
               <div className="superadmin-stats-row">

@@ -6,6 +6,7 @@ import UserIcon from '@/components/ui/UserIcon'
 const searchLabels = {
   cases: 'ค้นหารหัสเคสหรือรหัสเสาไฟ',
   videos: 'ค้นหาชื่อไฟล์วิดีโอ',
+  notifications: 'ค้นหาการแจ้งเตือน รหัสเคส หรือไฟล์วิดีโอ',
   superadmin: 'ค้นหารหัสเคส รหัสเสาไฟ หรือรายละเอียด',
   'superadmin-users': 'ค้นหาชื่อ อีเมล หรือแผนก',
 }

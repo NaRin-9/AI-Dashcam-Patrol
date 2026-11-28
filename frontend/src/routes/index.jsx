@@ -8,6 +8,7 @@ import RegisterPage from '@/pages/Register'
 import ResetPasswordPage from '@/pages/ResetPassword'
 import WelcomePage from '@/pages/Welcome'
 import MyVideosPage from '@/pages/MyVideos'
+import NotificationsPage from '@/pages/Notifications'
 import AdminDashboardPage from '@/pages/AdminDashboard'
 import SuperadminDashboardPage from '@/pages/SuperadminDashboard'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
@@ -42,6 +43,14 @@ export const routes = [
     element: (
       <ProtectedRoute>
         <MyVideosPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/notifications',
+    element: (
+      <ProtectedRoute>
+        <NotificationsPage />
       </ProtectedRoute>
     ),
   },
